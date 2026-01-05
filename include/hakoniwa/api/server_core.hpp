@@ -4,8 +4,11 @@
 #include <string>
 #include <string_view>
 #include <memory>
+#include <thread>
+#include <mutex>
 
 namespace hakoniwa::time_source { class ITimeSource; }
+namespace hakoniwa::pdu::rpc { class RpcServicesServer; }
 
 namespace hakoniwa::api {
 
@@ -18,21 +21,26 @@ public:
     bool stop();   // idempotent
 
     bool is_running() const noexcept { return is_running_.load(); }
-    std::string_view last_error() const noexcept;
+    std::string last_error() const noexcept;
 
 private:
-    bool serve();
+    void serve();
     void set_last_error(std::string msg);
 
 private:
     std::string config_path_;
     std::string node_id_;
     std::string last_error_;
+    std::string rpc_config_path_;
 
     std::atomic<bool> is_running_{false};
     std::atomic<bool> stop_requested_{false};
 
+    std::mutex start_mutex_;
+    mutable std::mutex err_mutex_;
     std::unique_ptr<hakoniwa::time_source::ITimeSource> time_source_;
+    std::unique_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
+    std::thread serve_thread_;
 };
 
 } // namespace hakoniwa::api

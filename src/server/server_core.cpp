@@ -1,0 +1,131 @@
+#include "hakoniwa/api/server_core.hpp"
+#include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include <iostream>
+#include <chrono>
+#include <string>
+#include <filesystem>
+
+namespace hakoniwa::api {
+
+ServerCore::ServerCore(std::string config_path)
+    : config_path_(std::move(config_path)) {
+    // Constructor initializes the config path.
+    // The rest of the initialization happens in start().
+}
+
+ServerCore::~ServerCore() {
+    if (is_running()) {
+        stop();
+    }
+}
+
+bool ServerCore::start() {
+    std::lock_guard<std::mutex> lock(start_mutex_);
+
+    if (is_running()) {
+        set_last_error("Server is already running.");
+        return false;
+    }
+
+    // 1. Parse remote-api.json config and extract values
+    try {
+        nlohmann::json config;
+        std::ifstream ifs(config_path_);
+        if (!ifs.is_open()) {
+            set_last_error("Failed to open config file: " + config_path_);
+            return false;
+        }
+        ifs >> config;
+
+        // Extract configuration values
+        node_id_ = config["server"]["nodeId"];
+        
+        // Construct the full path for the RPC config
+        std::filesystem::path base_path = std::filesystem::path(config_path_).parent_path();
+        rpc_config_path_ = (base_path / config["rpc_service_config_path"].get<std::string>()).string();
+
+    } catch (const std::exception& e) {
+        set_last_error("Failed to process configuration file: " + std::string(e.what()));
+        return false;
+    }
+
+    // 2. Initialize RPC Server
+    try {
+        // The queue size (1000) is hardcoded for now, as in the test.
+        rpc_server_ = std::make_unique<hakoniwa::pdu::rpc::RpcServicesServer>(node_id_, "RpcServerEndpointImpl", rpc_config_path_, 1000);
+        if (!rpc_server_->initialize_services()) {
+            set_last_error("Failed to initialize RPC services.");
+            rpc_server_.reset();
+            return false;
+        }
+    } catch (const std::exception& e) {
+        set_last_error("Failed to create RpcServicesServer: " + std::string(e.what()));
+        return false;
+    }
+
+    // 3. Start services and serving thread
+    rpc_server_->start_all_services();
+
+    stop_requested_ = false;
+    is_running_ = true;
+    serve_thread_ = std::thread(&ServerCore::serve, this);
+
+    std::cout << "Hakoniwa Remote API Server started." << std::endl;
+    return true;
+}
+
+bool ServerCore::stop() {
+    if (!is_running()) {
+        // Not an error, just idempotent.
+        return true;
+    }
+
+    std::cout << "Stopping Hakoniwa Remote API Server..." << std::endl;
+    stop_requested_ = true;
+
+    if (serve_thread_.joinable()) {
+        serve_thread_.join();
+    }
+
+    if (rpc_server_) {
+        rpc_server_->stop_all_services();
+        rpc_server_->clear_all_instances();
+        rpc_server_.reset();
+    }
+    
+    is_running_ = false;
+    std::cout << "Hakoniwa Remote API Server stopped." << std::endl;
+    return true;
+}
+
+void ServerCore::serve() {
+    while (!stop_requested_) {
+        if (rpc_server_) {
+            hakoniwa::pdu::rpc::RpcRequest request;
+            hakoniwa::pdu::rpc::ServerEventType event = rpc_server_->poll(request);
+
+            if (event == hakoniwa::pdu::rpc::ServerEventType::REQUEST_IN) {
+                // TODO: Handle the incoming request.
+                // For now, we just acknowledge receipt without details.
+                std::cout << "Received a request." << std::endl;
+            }
+        }
+        // Prevent busy-waiting
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
+std::string ServerCore::last_error() const noexcept {
+    std::lock_guard<std::mutex> lock(err_mutex_);
+    return last_error_;
+}
+
+void ServerCore::set_last_error(std::string msg) {
+    std::lock_guard<std::mutex> lock(err_mutex_);
+    std::cerr << "ERROR: " << msg << std::endl;
+    last_error_ = std::move(msg);
+}
+
+} // namespace hakoniwa::api

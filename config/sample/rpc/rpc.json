@@ -1,6 +1,6 @@
 {
   "pduMetaDataSize": 24,
-  "pdu_config_path": "../pdudef.json",
+  "pdu_config_path": "../pdudef/pdudef.json",
   "endpoints": [
     {
       "nodeId": "node0",

@@ -21,11 +21,15 @@ ServerCore::~ServerCore() {
     }
 }
 
-bool ServerCore::start() {
+bool ServerCore::initialize() {
     std::lock_guard<std::mutex> lock(start_mutex_);
 
     if (is_running()) {
         set_last_error("Server is already running.");
+        return false;
+    }
+    if (is_initialized_.load()) {
+        set_last_error("Server is already initialized.");
         return false;
     }
 
@@ -39,18 +43,50 @@ bool ServerCore::start() {
         }
         ifs >> config;
 
-        // Extract configuration values
+        // Check for "server" and "server.nodeId"
+        if (!config.contains("server") || !config["server"].is_object()) {
+            set_last_error("Config error: 'server' object not found or not an object.");
+            return false;
+        }
+        if (!config["server"].contains("nodeId") || !config["server"]["nodeId"].is_string()) {
+            set_last_error("Config error: 'server.nodeId' not found or not a string.");
+            return false;
+        }
         node_id_ = config["server"]["nodeId"];
+
+        // Check for "delta_time_usec"
+        if (!config.contains("delta_time_usec") || !config["delta_time_usec"].is_number_unsigned()) {
+            set_last_error("Config error: 'delta_time_usec' not found or not an unsigned number.");
+            return false;
+        }
         delta_time_usec_ = config["delta_time_usec"].get<uint64_t>();
+        if (delta_time_usec_ == 0) {
+            set_last_error("Config error: 'delta_time_usec' must be greater than 0.");
+            return false;
+        }
+
+        // Check for "time_source_type"
+        if (!config.contains("time_source_type") || !config["time_source_type"].is_string()) {
+            set_last_error("Config error: 'time_source_type' not found or not a string.");
+            return false;
+        }
         std::string time_source_type = config["time_source_type"];
         time_source_ = hakoniwa::time_source::create_time_source(time_source_type, delta_time_usec_);
+        if (!time_source_) {
+            set_last_error("Config error: Invalid 'time_source_type': " + time_source_type);
+            return false;
+        }
         
-        // Construct the full path for the RPC config
+        // Check for "rpc_service_config_path"
+        if (!config.contains("rpc_service_config_path") || !config["rpc_service_config_path"].is_string()) {
+            set_last_error("Config error: 'rpc_service_config_path' not found or not a string.");
+            return false;
+        }
         std::filesystem::path base_path = std::filesystem::path(config_path_).parent_path();
         rpc_config_path_ = (base_path / config["rpc_service_config_path"].get<std::string>()).string();
 
-    } catch (const std::exception& e) {
-        set_last_error("Failed to process configuration file: " + std::string(e.what()));
+    } catch (const nlohmann::json::parse_error& e) {
+        set_last_error("Failed to parse configuration file: " + std::string(e.what()));
         return false;
     }
 
@@ -67,7 +103,20 @@ bool ServerCore::start() {
         set_last_error("Failed to create RpcServicesServer: " + std::string(e.what()));
         return false;
     }
+    is_initialized_ = true;
+    return true;
+}
 
+bool ServerCore::start() {
+    std::lock_guard<std::mutex> lock(start_mutex_);
+    if (is_running()) {
+        set_last_error("Server is already running.");
+        return false;
+    }
+    if (!is_initialized_.load()) {
+        set_last_error("Server is not properly initialized.");
+        return false;
+    }    
     // 3. Start services and serving thread
     rpc_server_->start_all_services();
 
@@ -80,6 +129,7 @@ bool ServerCore::start() {
 }
 
 bool ServerCore::stop() {
+    std::lock_guard<std::mutex> lock(start_mutex_);
     if (!is_running()) {
         // Not an error, just idempotent.
         return true;
@@ -94,8 +144,6 @@ bool ServerCore::stop() {
 
     if (rpc_server_) {
         rpc_server_->stop_all_services();
-        rpc_server_->clear_all_instances();
-        rpc_server_.reset();
     }
     
     is_running_ = false;

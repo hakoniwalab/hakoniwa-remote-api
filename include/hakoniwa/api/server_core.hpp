@@ -17,6 +17,7 @@ public:
     ServerCore(std::string config_path);
     ~ServerCore(); // stop() して join する前提
 
+    bool initialize(); // if needed in future
     bool start();  // non-blocking
     bool stop();   // idempotent
 
@@ -36,6 +37,7 @@ private:
 
     std::atomic<bool> is_running_{false};
     std::atomic<bool> stop_requested_{false};
+    std::atomic<bool> is_initialized_{false};
 
     std::mutex start_mutex_;
     mutable std::mutex err_mutex_;

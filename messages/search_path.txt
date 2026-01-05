@@ -1,0 +1,3 @@
+/opt/ros/foxy/share
+/root/workspace/hakoniwa-ros2pdu/hakoniwa-ros2pdu/workspace/src
+../hakoniwa-remote-api/messages/service

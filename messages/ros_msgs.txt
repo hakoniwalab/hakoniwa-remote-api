@@ -1,0 +1,10 @@
+hako_srv_msgs/JoinRequest
+hako_srv_msgs/JoinResponse
+hako_srv_msgs/SimControlRequest
+hako_srv_msgs/SimControlResponse
+hako_srv_msgs/GetSimStateRequest
+hako_srv_msgs/GetSimStateResponse
+hako_srv_msgs/GetEventRequest
+hako_srv_msgs/GetEventResponse
+hako_srv_msgs/AckEventRequest
+hako_srv_msgs/AckEventResponse

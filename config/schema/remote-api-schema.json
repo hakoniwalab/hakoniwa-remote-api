@@ -8,6 +8,9 @@
   "required": [
     "version",
     "rpc_service_config_path",
+    "server",
+    "time_source_type",
+    "delta_time_usec",
     "participants"
   ],
 
@@ -16,12 +19,30 @@
       "type": "integer",
       "minimum": 1
     },
-
+  
     "rpc_service_config_path": {
       "type": "string",
       "minLength": 1
     },
-
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodeId"],
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "time_source_type": {
+      "type": "string",
+      "enum": ["real", "virtual", "hakoniwa"]
+    },
+    "delta_time_usec": {
+      "type": "integer",
+      "minimum": 1
+    },
     "participants": {
       "type": "array",
       "minItems": 1,

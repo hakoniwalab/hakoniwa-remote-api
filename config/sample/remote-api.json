@@ -1,6 +1,11 @@
 {
     "version": 1,
     "rpc_service_config_path": "rpc/rpc.json",
+    "server": {
+        "nodeId": "node0" 
+    },
+    "time_source_type": "real",
+    "delta_time_usec": 10000,
     "participants": [
         {
             "name": "client-01",

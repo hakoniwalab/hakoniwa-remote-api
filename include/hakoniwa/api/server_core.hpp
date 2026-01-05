@@ -32,6 +32,7 @@ private:
     std::string node_id_;
     std::string last_error_;
     std::string rpc_config_path_;
+    uint64_t delta_time_usec_{1000};
 
     std::atomic<bool> is_running_{false};
     std::atomic<bool> stop_requested_{false};

@@ -41,6 +41,9 @@ bool ServerCore::start() {
 
         // Extract configuration values
         node_id_ = config["server"]["nodeId"];
+        delta_time_usec_ = config["delta_time_usec"].get<uint64_t>();
+        std::string time_source_type = config["time_source_type"];
+        time_source_ = hakoniwa::time_source::create_time_source(time_source_type, delta_time_usec_);
         
         // Construct the full path for the RPC config
         std::filesystem::path base_path = std::filesystem::path(config_path_).parent_path();
@@ -112,8 +115,7 @@ void ServerCore::serve() {
                 std::cout << "Received a request." << std::endl;
             }
         }
-        // Prevent busy-waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        time_source_->sleep_delta_time();
     }
 }
 

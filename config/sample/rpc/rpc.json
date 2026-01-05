@@ -3,7 +3,7 @@
   "pdu_config_path": "../pdudef.json",
   "endpoints": [
     {
-      "nodeId": "server_node",
+      "nodeId": "node0",
       "endpoints": [
         {
           "id": "server_ep_id",
@@ -12,11 +12,20 @@
       ]
     },
     {
-      "nodeId": "client_node",
+      "nodeId": "node1",
       "endpoints": [
         {
-          "id": "client_ep_id",
-          "config_path": "../endpoint/client_endpoint.json"
+          "id": "client1_ep_id",
+          "config_path": "../endpoint/client1_endpoint.json"
+        }
+      ]
+    },
+    {
+      "nodeId": "node2",
+      "endpoints": [
+        {
+          "id": "client2_ep_id",
+          "config_path": "../endpoint/client2_endpoint.json"
         }
       ]
     }
@@ -25,25 +34,35 @@
     {
       "name": "Service/Add",
       "type": "hako_srv_msgs/AddTwoInts",
-      "maxClients": 1,
+      "maxClients": 10,
       "pduSize": {
         "server": { "heapSize": 0, "baseSize": 296 },
         "client": { "heapSize": 0, "baseSize": 288 }
       },
       "server_endpoint": {
-        "nodeId": "server_node",
+        "nodeId": "node0",
         "endpointId": "server_ep_id"
       },
       "clients": [
         {
-          "name": "TestClient",
+          "name": "TestClient1",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {
-            "nodeId": "client_node",
-            "endpointId": "client_ep_id"
+            "nodeId": "node1",
+            "endpointId": "client1_ep_id"
+          }
+        },
+        {
+          "name": "TestClient2",
+          "requestChannelId": 3,
+          "responseChannelId": 4,
+          "client_endpoint": {
+            "nodeId": "node2",
+            "endpointId": "client2_ep_id"
           }
         }
+
       ]
     }
   ]

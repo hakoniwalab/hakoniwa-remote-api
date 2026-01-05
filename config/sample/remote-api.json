@@ -1,15 +1,17 @@
 {
     "version": 1,
     "rpc_service_config_path": "rpc/rpc.json",
-    "clients": [
+    "participants": [
         {
             "name": "client-01",
             "nodeId": "node1",
+            "role": "conductor",
             "delta_time_usec": 10000
         },
         {
             "name": "client-02",
             "nodeId": "node2",
+            "role": "conductor",
             "delta_time_usec": 20000
         }
     ]

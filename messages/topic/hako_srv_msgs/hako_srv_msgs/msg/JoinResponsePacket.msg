@@ -1,0 +1,2 @@
+ServiceResponseHeader header
+JoinResponse body

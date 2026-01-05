@@ -1,0 +1,2 @@
+string name
+uint32 event_code

@@ -36,8 +36,14 @@
       "type": "hako_srv_msgs/Join",
       "maxClients": 10,
       "pduSize": {
-        "server": { "heapSize": 0, "baseSize": 296 },
-        "client": { "heapSize": 0, "baseSize": 288 }
+        "server": {
+          "heapSize": 0,
+          "baseSize": 400
+        },
+        "client": {
+          "heapSize": 0,
+          "baseSize": 400
+        }
       },
       "server_endpoint": {
         "nodeId": "node0",
@@ -60,8 +66,14 @@
       "type": "hako_srv_msgs/SimControl",
       "maxClients": 10,
       "pduSize": {
-        "server": { "heapSize": 0, "baseSize": 296 },
-        "client": { "heapSize": 0, "baseSize": 288 }
+        "server": {
+          "heapSize": 0,
+          "baseSize": 400
+        },
+        "client": {
+          "heapSize": 0,
+          "baseSize": 400
+        }
       },
       "server_endpoint": {
         "nodeId": "node0",
@@ -84,8 +96,14 @@
       "type": "hako_srv_msgs/GetEvent",
       "maxClients": 10,
       "pduSize": {
-        "server": { "heapSize": 0, "baseSize": 296 },
-        "client": { "heapSize": 0, "baseSize": 288 }
+        "server": {
+          "heapSize": 0,
+          "baseSize": 400
+        },
+        "client": {
+          "heapSize": 0,
+          "baseSize": 272
+        }
       },
       "server_endpoint": {
         "nodeId": "node0",
@@ -108,8 +126,14 @@
       "type": "hako_srv_msgs/AckEvent",
       "maxClients": 10,
       "pduSize": {
-        "server": { "heapSize": 0, "baseSize": 296 },
-        "client": { "heapSize": 0, "baseSize": 288 }
+        "server": {
+          "heapSize": 0,
+          "baseSize": 400
+        },
+        "client": {
+          "heapSize": 0,
+          "baseSize": 272
+        }
       },
       "server_endpoint": {
         "nodeId": "node0",
@@ -132,8 +156,14 @@
       "type": "hako_srv_msgs/GetSimState",
       "maxClients": 10,
       "pduSize": {
-        "server": { "heapSize": 0, "baseSize": 296 },
-        "client": { "heapSize": 0, "baseSize": 288 }
+        "server": {
+          "heapSize": 0,
+          "baseSize": 400
+        },
+        "client": {
+          "heapSize": 0,
+          "baseSize": 272
+        }
       },
       "server_endpoint": {
         "nodeId": "node0",
@@ -150,6 +180,6 @@
           }
         }
       ]
-    }    
+    }
   ]
 }

@@ -18,3 +18,27 @@ To ensure the stability and correctness of the configuration, a two-stage valida
     *   Verifying logical constraints, such as client counts not exceeding `maxClients`.
 
 This two-stage approach allows for both robust static verification and the detection of complex, inter-file configuration errors that schemas alone cannot capture.
+
+### Utilities
+
+#### `update_pdusize.py`
+
+このユーティリティは、PDUサイズ定義ファイルに基づいて `rpc.json` 設定ファイル内の `pduSize` フィールドを自動的に更新します。これにより、RPCサービス設定が常に正しいPDUサイズを反映し、手動エラーを防ぎ、更新プロセスを効率化します。
+
+**使用方法:**
+
+```bash
+python3 tools/update_pdusize.py <path_to_rpc_json> <path_to_pdu_size_dir>
+```
+
+*   `<path_to_rpc_json>`: `rpc.json` ファイルへのパス (例: `config/sample/rpc/rpc.json`)。
+*   `<path_to_pdu_size_dir>`: PDUサイズ定義ファイルが配置されているルートディレクトリ (例: `messages/impl/pdu_size`)。
+
+**例:**
+
+サンプル `rpc.json` ファイルを更新する場合:
+
+```bash
+python3 tools/update_pdusize.py config/sample/rpc/rpc.json messages/impl/pdu_size
+```
+

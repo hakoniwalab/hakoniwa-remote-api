@@ -32,8 +32,8 @@
   ],
   "services": [
     {
-      "name": "Service/Add",
-      "type": "hako_srv_msgs/AddTwoInts",
+      "name": "HakoRemoteApi/Join",
+      "type": "hako_srv_msgs/Join",
       "maxClients": 10,
       "pduSize": {
         "server": { "heapSize": 0, "baseSize": 296 },
@@ -52,18 +52,104 @@
             "nodeId": "node1",
             "endpointId": "client1_ep_id"
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "HakoRemoteApi/SimControl",
+      "type": "hako_srv_msgs/SimControl",
+      "maxClients": 10,
+      "pduSize": {
+        "server": { "heapSize": 0, "baseSize": 296 },
+        "client": { "heapSize": 0, "baseSize": 288 }
+      },
+      "server_endpoint": {
+        "nodeId": "node0",
+        "endpointId": "server_ep_id"
+      },
+      "clients": [
         {
-          "name": "TestClient2",
-          "requestChannelId": 3,
-          "responseChannelId": 4,
+          "name": "TestClient1",
+          "requestChannelId": 1,
+          "responseChannelId": 2,
           "client_endpoint": {
-            "nodeId": "node2",
-            "endpointId": "client2_ep_id"
+            "nodeId": "node1",
+            "endpointId": "client1_ep_id"
           }
         }
-
       ]
-    }
+    },
+    {
+      "name": "HakoRemoteApi/GetEvent",
+      "type": "hako_srv_msgs/GetEvent",
+      "maxClients": 10,
+      "pduSize": {
+        "server": { "heapSize": 0, "baseSize": 296 },
+        "client": { "heapSize": 0, "baseSize": 288 }
+      },
+      "server_endpoint": {
+        "nodeId": "node0",
+        "endpointId": "server_ep_id"
+      },
+      "clients": [
+        {
+          "name": "TestClient1",
+          "requestChannelId": 1,
+          "responseChannelId": 2,
+          "client_endpoint": {
+            "nodeId": "node1",
+            "endpointId": "client1_ep_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HakoRemoteApi/AckEvent",
+      "type": "hako_srv_msgs/AckEvent",
+      "maxClients": 10,
+      "pduSize": {
+        "server": { "heapSize": 0, "baseSize": 296 },
+        "client": { "heapSize": 0, "baseSize": 288 }
+      },
+      "server_endpoint": {
+        "nodeId": "node0",
+        "endpointId": "server_ep_id"
+      },
+      "clients": [
+        {
+          "name": "TestClient1",
+          "requestChannelId": 1,
+          "responseChannelId": 2,
+          "client_endpoint": {
+            "nodeId": "node1",
+            "endpointId": "client1_ep_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HakoRemoteApi/GetSimState",
+      "type": "hako_srv_msgs/GetSimState",
+      "maxClients": 10,
+      "pduSize": {
+        "server": { "heapSize": 0, "baseSize": 296 },
+        "client": { "heapSize": 0, "baseSize": 288 }
+      },
+      "server_endpoint": {
+        "nodeId": "node0",
+        "endpointId": "server_ep_id"
+      },
+      "clients": [
+        {
+          "name": "TestClient1",
+          "requestChannelId": 1,
+          "responseChannelId": 2,
+          "client_endpoint": {
+            "nodeId": "node1",
+            "endpointId": "client1_ep_id"
+          }
+        }
+      ]
+    }    
   ]
 }

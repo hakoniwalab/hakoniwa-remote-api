@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 # Add the source files to the library
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/**/*.cpp")
 add_library(${PROJECT_NAME} ${SOURCES})
 
 # Tests

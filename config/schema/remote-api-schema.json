@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakoniwa.dev/schema/api-config.json",
+  "title": "Hakoniwa Remote API Config",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "version",
+    "rpc_service_config_path",
+    "clients"
+  ],
+
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "API config schema version"
+    },
+
+    "rpc_service_config_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path to hakoniwa RPC service config file"
+    },
+
+    "clients": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of client definitions",
+      "items": {
+        "$ref": "#/$defs/client"
+      },
+      "uniqueItems": true
+    }
+  },
+
+  "$defs": {
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "nodeId",
+        "delta_time_usec"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Client identifier (must be unique)"
+        },
+
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target Hakoniwa node ID"
+        },
+
+        "delta_time_usec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Simulation delta time in microseconds"
+        }
+      }
+    }
+  }
+}

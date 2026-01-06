@@ -1,5 +1,6 @@
 #include "hakoniwa/api/server_core.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
+#include "concrete_service_handler.hpp"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
@@ -85,6 +86,9 @@ bool ServerCore::initialize() {
         std::filesystem::path base_path = std::filesystem::path(config_path_).parent_path();
         rpc_config_path_ = (base_path / config["rpc_service_config_path"].get<std::string>()).string();
 
+        // service handlers registration
+        handlers_["HakoRemoteApi/Join"] = std::make_unique<JoinHandler>();
+
     } catch (const nlohmann::json::parse_error& e) {
         set_last_error("Failed to parse configuration file: " + std::string(e.what()));
         return false;
@@ -158,8 +162,6 @@ void ServerCore::serve() {
             hakoniwa::pdu::rpc::ServerEventType event = rpc_server_->poll(request);
 
             if (event == hakoniwa::pdu::rpc::ServerEventType::REQUEST_IN) {
-                // TODO: Handle the incoming request.
-                // For now, we just acknowledge receipt without details.
                 std::cout << "Received a request." << std::endl;
             }
         }

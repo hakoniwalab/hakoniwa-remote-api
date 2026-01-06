@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include "hakoniwa/api/iservice_handler.hpp"
 
 namespace hakoniwa::time_source { class ITimeSource; }
 namespace hakoniwa::pdu::rpc { class RpcServicesServer; }
@@ -44,6 +45,8 @@ private:
     std::unique_ptr<hakoniwa::time_source::ITimeSource> time_source_;
     std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
     std::thread serve_thread_;
+
+    std::unordered_map<std::string, std::unique_ptr<hakoniwa::api::IServiceHandler>> handlers_;
 };
 
 } // namespace hakoniwa::api

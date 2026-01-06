@@ -228,7 +228,7 @@ void ServerCore::handle() {
             const auto& service_name = job.first;
             auto it = handlers_.find(service_name);
             if (it != handlers_.end()) {
-                it->second->handle(rpc_server_, job.second);
+                it->second->handle(server_context_, rpc_server_, job.second);
                 {
                     std::lock_guard<std::mutex> lock(handler_mutex_);
                     pending_requests_.erase(service_name);

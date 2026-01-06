@@ -7,6 +7,7 @@
 #include <thread>
 #include <mutex>
 #include "hakoniwa/api/iservice_handler.hpp"
+#include "hakoniwa/api/server_context.hpp"
 
 namespace hakoniwa::time_source { class ITimeSource; }
 namespace hakoniwa::pdu::rpc { class RpcServicesServer; }
@@ -54,6 +55,8 @@ private:
     std::unordered_map<std::string, std::unique_ptr<hakoniwa::api::IServiceHandler>> handlers_;
     // service_name, pending requests
     std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_requests_;
+
+    ServerContext server_context_;
 };
 
 } // namespace hakoniwa::api

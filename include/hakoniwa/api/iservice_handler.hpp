@@ -2,13 +2,14 @@
 
 #include "hakoniwa/api/protocol.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
+#include "hakoniwa/api/server_context.hpp"
 
 namespace hakoniwa::api {
 
 class IServiceHandler {
 public:
     virtual ~IServiceHandler() = default;
-    virtual void handle(std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  const hakoniwa::pdu::rpc::RpcRequest& request) = 0;
+    virtual void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  const hakoniwa::pdu::rpc::RpcRequest& request) = 0;
     virtual void cancel() {
         is_canceled_ = true;
     }

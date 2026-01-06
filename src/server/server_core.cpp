@@ -93,7 +93,7 @@ bool ServerCore::initialize() {
     // 2. Initialize RPC Server
     try {
         // The queue size (1000) is hardcoded for now, as in the test.
-        rpc_server_ = std::make_unique<hakoniwa::pdu::rpc::RpcServicesServer>(node_id_, "RpcServerEndpointImpl", rpc_config_path_, 1000);
+        rpc_server_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesServer>(node_id_, "RpcServerEndpointImpl", rpc_config_path_, 1000);
         if (!rpc_server_->initialize_services()) {
             set_last_error("Failed to initialize RPC services.");
             rpc_server_.reset();

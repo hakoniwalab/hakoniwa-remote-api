@@ -42,7 +42,7 @@ private:
     std::mutex start_mutex_;
     mutable std::mutex err_mutex_;
     std::unique_ptr<hakoniwa::time_source::ITimeSource> time_source_;
-    std::unique_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
+    std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
     std::thread serve_thread_;
 };
 

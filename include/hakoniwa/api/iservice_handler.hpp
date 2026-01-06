@@ -9,5 +9,6 @@ class IServiceHandler {
 public:
     virtual ~IServiceHandler() = default;
     virtual void handle(std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  const hakoniwa::pdu::rpc::RpcRequest& request) = 0;
+    virtual void cancel() = 0;
 };
 } // namespace hakoniwa::api

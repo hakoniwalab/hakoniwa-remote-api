@@ -27,6 +27,7 @@ public:
 
 private:
     void serve();
+    void handle();
     void set_last_error(std::string msg);
 
 private:
@@ -46,7 +47,15 @@ private:
     std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
     std::thread serve_thread_;
 
+    std::thread service_handle_thread_;
+    std::mutex handler_mutex_;
+    std::condition_variable handler_cv_;
+    // service_name, handler
     std::unordered_map<std::string, std::unique_ptr<hakoniwa::api::IServiceHandler>> handlers_;
+    // service_name, pending requests
+    std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_requests_;
+    // service_name, pending cancels
+    std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_cancels_;
 };
 
 } // namespace hakoniwa::api

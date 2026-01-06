@@ -127,6 +127,7 @@ bool ServerCore::start() {
     stop_requested_ = false;
     is_running_ = true;
     serve_thread_ = std::thread(&ServerCore::serve, this);
+    service_handle_thread_ = std::thread(&ServerCore::handle, this);
 
     std::cout << "Hakoniwa Remote API Server started." << std::endl;
     return true;
@@ -145,6 +146,9 @@ bool ServerCore::stop() {
     if (serve_thread_.joinable()) {
         serve_thread_.join();
     }
+    if (service_handle_thread_.joinable()) {
+        service_handle_thread_.join();
+    }
 
     if (rpc_server_) {
         rpc_server_->stop_all_services();
@@ -159,13 +163,64 @@ void ServerCore::serve() {
     while (!stop_requested_) {
         if (rpc_server_) {
             hakoniwa::pdu::rpc::RpcRequest request;
-            hakoniwa::pdu::rpc::ServerEventType event = rpc_server_->poll(request);
+            auto event = rpc_server_->poll(request);
 
             if (event == hakoniwa::pdu::rpc::ServerEventType::REQUEST_IN) {
-                std::cout << "Received a request." << std::endl;
+                bool inserted = false;
+                {
+                    std::lock_guard<std::mutex> lock(handler_mutex_);
+                    if (pending_requests_.count(request.header.service_name) == 0) {
+                        pending_requests_[request.header.service_name] = request;
+                        inserted = true;
+                    } else {
+                        std::cerr << "WARNING: Overwriting pending request for service: "
+                                  << request.header.service_name << std::endl;
+                    }
+                }
+                if (inserted) {
+                    handler_cv_.notify_one();
+                }
             }
         }
         time_source_->sleep_delta_time();
+    }
+    handler_cv_.notify_all(); // for stop
+}
+
+void ServerCore::handle() {
+    while (!stop_requested_) {
+        std::pair<std::string, hakoniwa::pdu::rpc::RpcRequest> job;
+        bool has_job = false;
+
+        {
+            std::unique_lock<std::mutex> lock(handler_mutex_);
+            handler_cv_.wait(lock, [&]{
+                return stop_requested_ || !pending_requests_.empty();
+            });
+
+            if (stop_requested_) {
+                std::cout << "Service handler thread stopping." << std::endl;
+                break;
+            }
+
+            job = *pending_requests_.begin();
+            has_job = true;
+        }
+
+        if (has_job) {
+            const auto& service_name = job.first;
+            auto it = handlers_.find(service_name);
+            if (it != handlers_.end()) {
+                it->second->handle(rpc_server_, job.second);
+                {
+                    std::lock_guard<std::mutex> lock(handler_mutex_);
+                    pending_requests_.erase(service_name);
+                }
+            } else {
+                std::cerr << "ERROR: No handler registered for service: "
+                          << service_name << std::endl;
+            }
+        }
     }
 }
 

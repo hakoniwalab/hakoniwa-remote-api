@@ -181,6 +181,23 @@ void ServerCore::serve() {
                     handler_cv_.notify_one();
                 }
             }
+            else if (event == hakoniwa::pdu::rpc::ServerEventType::REQUEST_CANCEL)
+            {
+                std::lock_guard<std::mutex> lock(handler_mutex_);
+                if (pending_requests_.count(request.header.service_name) > 0) {
+                    //TODO
+                    auto it = handlers_.find(request.header.service_name);
+                    if (it != handlers_.end()) {
+                        it->second->cancel();
+                    } else {
+                        std::cerr << "ERROR: No handler registered for service: "
+                                  << request.header.service_name << std::endl;
+                    }
+                } else {
+                    std::cerr << "WARNING: No pending request to cancel for service: "
+                              << request.header.service_name << std::endl;
+                }
+            }
         }
         time_source_->sleep_delta_time();
     }
@@ -215,6 +232,10 @@ void ServerCore::handle() {
                 {
                     std::lock_guard<std::mutex> lock(handler_mutex_);
                     pending_requests_.erase(service_name);
+                    if (it->second->is_canceled()) {
+                        // Reset cancellation state after handling
+                        it->second->reset_canceled();
+                    }
                 }
             } else {
                 std::cerr << "ERROR: No handler registered for service: "

@@ -54,8 +54,6 @@ private:
     std::unordered_map<std::string, std::unique_ptr<hakoniwa::api::IServiceHandler>> handlers_;
     // service_name, pending requests
     std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_requests_;
-    // service_name, pending cancels
-    std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_cancels_;
 };
 
 } // namespace hakoniwa::api

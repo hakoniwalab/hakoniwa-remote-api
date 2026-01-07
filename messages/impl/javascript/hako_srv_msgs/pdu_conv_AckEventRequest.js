@@ -37,6 +37,14 @@ export function binary_read_recursive_AckEventRequest(meta, binary_data, js_obj,
         js_obj.event_code = PduUtils.binToValue("uint32", bin);
     }
     
+    // member: result_code, type: uint32 (primitive)
+
+    
+    {
+        const bin = PduUtils.readBinary(binary_data, base_off + 132, 4);
+        js_obj.result_code = PduUtils.binToValue("uint32", bin);
+    }
+    
     return js_obj;
 }
 
@@ -83,6 +91,14 @@ export function binary_write_recursive_AckEventRequest(parent_off, bw_container,
     {
         const bin = PduUtils.typeToBin("uint32", js_obj.event_code, 4);
         allocator.add(bin, parent_off + 128);
+    }
+    
+    // member: result_code, type: uint32 (primitive)
+
+    
+    {
+        const bin = PduUtils.typeToBin("uint32", js_obj.result_code, 4);
+        allocator.add(bin, parent_off + 132);
     }
     
 }

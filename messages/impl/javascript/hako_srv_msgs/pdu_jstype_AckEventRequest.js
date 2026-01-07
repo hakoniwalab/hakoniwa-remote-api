@@ -9,11 +9,14 @@ export class AckEventRequest {
     name;
 /** @type { number } */
     event_code;
+/** @type { number } */
+    result_code;
 
 
     constructor() {
         this.name = "";
         this.event_code = 0;
+        this.result_code = 0;
     }
 
     /**
@@ -43,6 +46,17 @@ export class AckEventRequest {
                 d['event_code'] = field_val;
             }
         }
+        {
+            // handle field 'result_code'
+            const field_val = this.result_code;
+            if (typeof field_val?.toDict === 'function') {
+                d['result_code'] = field_val.toDict();
+            } else if (Array.isArray(field_val)) {
+                d['result_code'] = field_val.map(item => typeof item?.toDict === 'function' ? item.toDict() : item);
+            } else {
+                d['result_code'] = field_val;
+            }
+        }
         return d;
     }
 
@@ -57,6 +71,9 @@ export class AckEventRequest {
         }
         if (d.hasOwnProperty('event_code')) {
             obj.event_code = d.event_code;
+        }
+        if (d.hasOwnProperty('result_code')) {
+            obj.result_code = d.result_code;
         }
         return obj;
     }

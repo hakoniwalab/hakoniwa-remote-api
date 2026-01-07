@@ -29,6 +29,8 @@ static inline int cpp_pdu2cpp_AckEventRequest(const char* heap_ptr, Hako_AckEven
     dst.name = (const char*)src.name;
     // primitive convert
     hako_convert_pdu2cpp(src.event_code, dst.event_code);
+    // primitive convert
+    hako_convert_pdu2cpp(src.result_code, dst.result_code);
     (void)heap_ptr;
     return 0;
 }
@@ -62,6 +64,8 @@ static inline bool cpp_cpp2pdu_AckEventRequest(HakoCpp_AckEventRequest &src, Hak
         dst.name[src.name.length()] = '\0';
         // primitive convert
         hako_convert_cpp2pdu(src.event_code, dst.event_code);
+        // primitive convert
+        hako_convert_cpp2pdu(src.result_code, dst.result_code);
     } catch (const std::runtime_error& e) {
         std::cerr << "convertor error: " << e.what() << std::endl;
         return false;

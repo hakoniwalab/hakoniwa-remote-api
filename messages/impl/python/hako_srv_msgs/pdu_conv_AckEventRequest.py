@@ -41,6 +41,17 @@ def binary_read_recursive_AckEventRequest(meta: binary_io.PduMetaData, binary_da
     bin = binary_io.readBinary(binary_data, base_off + 128, 4)
     py_obj.event_code = binary_io.binTovalue("uint32", bin)
     
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: result_code 
+    # type_name: uint32 
+    # offset: 132 size: 4 
+    # array_len: 1
+
+    
+    bin = binary_io.readBinary(binary_data, base_off + 132, 4)
+    py_obj.result_code = binary_io.binTovalue("uint32", bin)
+    
     return py_obj
 
 
@@ -98,6 +109,20 @@ def binary_write_recursive_AckEventRequest(parent_off: int, bw_container: Binary
 
     
     bin = binary_io.typeTobin(type, py_obj.event_code)
+    bin = get_binary(type, bin, 4)
+    allocator.add(bin, expected_offset=parent_off + off)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: result_code 
+    # type_name: uint32 
+    # offset: 132 size: 4 
+    # array_len: 1
+    type = "uint32"
+    off = 132
+
+    
+    bin = binary_io.typeTobin(type, py_obj.result_code)
     bin = get_binary(type, bin, 4)
     allocator.add(bin, expected_offset=parent_off + off)
     

@@ -36,7 +36,7 @@ def binary_read_recursive_AckEventRequestPacket(meta: binary_io.PduMetaData, bin
     # data_type: struct 
     # member_name: body 
     # type_name: AckEventRequest 
-    # offset: 268 size: 132 
+    # offset: 268 size: 136 
     # array_len: 1
 
     tmp_py_obj = AckEventRequest()
@@ -90,7 +90,7 @@ def binary_write_recursive_AckEventRequestPacket(parent_off: int, bw_container: 
     # data_type: struct 
     # member_name: body 
     # type_name: AckEventRequest 
-    # offset: 268 size: 132 
+    # offset: 268 size: 136 
     # array_len: 1
     type = "AckEventRequest"
     off = 268

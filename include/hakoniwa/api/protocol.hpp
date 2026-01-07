@@ -23,4 +23,13 @@ enum class HakoSimulationControlCommand
     HakoSimControl_Count
 
 };
+enum class HakoSimulationAssetEvent
+{
+    HakoSimAssetEvent_None = 0,
+    HakoSimAssetEvent_Start,
+    HakoSimAssetEvent_Stop,
+    HakoSimAssetEvent_Reset,
+    HakoSimAssetEvent_Error,
+    HakoSimAssetEvent_Count
+};
 }

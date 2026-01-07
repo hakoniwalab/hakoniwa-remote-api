@@ -25,5 +25,10 @@ namespace hakoniwa.pdu.msgs.hako_srv_msgs
             get => _pdu.GetData<uint>("event_code");
             set => _pdu.SetData("event_code", value);
         }
+        public uint result_code
+        {
+            get => _pdu.GetData<uint>("result_code");
+            set => _pdu.SetData("result_code", value);
+        }
     }
 }

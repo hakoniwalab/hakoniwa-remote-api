@@ -193,7 +193,6 @@ void GetEventHandler::handle(
     hakoniwa::pdu::rpc::RpcRequest& request)
 {
     HakoRpcServiceServerTemplateType(GetEvent) service_helper;
-    // std::string message = "GetEvent request Sccessed."; // Removed
     std::cout << "Handling get_event request from client: "
               << request.client_name << std::endl;
 
@@ -204,24 +203,19 @@ void GetEventHandler::handle(
                       << service_context.get_client_node_id()
                       << "', got '" << request.client_name << "'." << std::endl;
             result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-            // message = "Client node ID mismatch."; // Removed
         }
     }
     HakoCpp_GetEventResponse response_body;
     if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-        // HakoCpp_GetEventRequest request_body; // Temporarily commented out as includes were removed
-        // auto ret = service_helper.get_request_body(request, request_body); // Temporarily commented out
-        bool ret = true; // Placeholder
-        if (!ret) {
+        int event_code = hako_asset_get_event(request.client_name.c_str());
+        if (static_cast<hakoniwa::api::HakoSimulationAssetEvent>(event_code) == hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Error) {
             std::cerr << "ERROR: Failed to get GetEvent request body." << std::endl;
             result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-            // message = "Invalid GetEvent request body."; // Removed
         }
-        // TODO:
+        else {
+            response_body.event_code = static_cast<Hako_uint32>(event_code);
+        }
     }
-
-    // response_body.status_code = result_code; // Removed
-    // TODO:
     service_helper.reply(
         *service_rpc,
         request,
@@ -236,36 +230,60 @@ void AckEventHandler::handle(
     hakoniwa::pdu::rpc::RpcRequest& request)
 {
     HakoRpcServiceServerTemplateType(AckEvent) service_helper;
-    // std::string message = "AckEvent request Sccessed."; // Removed
     std::cout << "Handling ack_event request from client: "
               << request.client_name << std::endl;
 
     Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
+    HakoCpp_AckEventRequest request_body;
     if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
         if (request.client_name != service_context.get_client_node_id()) {
             std::cerr << "WARNING: Client node ID mismatch. Expected '"
                       << service_context.get_client_node_id()
                       << "', got '" << request.client_name << "'." << std::endl;
             result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-            // message = "Client node ID mismatch."; // Removed
+        }
+        else {
+            auto ret = service_helper.get_request_body(request, request_body);
+            if (!ret) {
+                std::cerr << "ERROR: Failed to get AckEvent request body." << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            }
+            else if (request_body.result_code != static_cast<Hako_uint32>(hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK)) {
+                std::cerr << "ERROR: AckEvent request contains error result code: "
+                          << request_body.result_code << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            }
+            else if (request_body.event_code >= static_cast<Hako_uint32>(hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Error)) {
+                std::cerr << "ERROR: AckEvent request contains invalid event code: "
+                          << request_body.event_code << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            }
         }
     }
 
     HakoCpp_AckEventResponse response_body;
     if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-        // HakoCpp_AckEventRequest request_body; // Temporarily commented out as includes were removed
-        // auto ret = service_helper.get_request_body(request, request_body); // Temporarily commented out
-        bool ret = true; // Placeholder
-        if (!ret) {
-            std::cerr << "ERROR: Failed to get AckEvent request body." << std::endl;
-            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-            // message = "Invalid AckEvent request body."; // Removed
+        bool ret = false;
+        hakoniwa::api::HakoSimulationAssetEvent event_code =
+            static_cast<hakoniwa::api::HakoSimulationAssetEvent>(request_body.event_code);
+        switch (event_code) {
+            case hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Start:
+                ret = hako_asset_start_feedback(request.client_name.c_str(), true);
+                break;
+            case hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:
+                ret = hako_asset_stop_feedback(request.client_name.c_str(), true);
+                break;
+            case hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Reset:
+                ret = hako_asset_reset_feedback(request.client_name.c_str(), true);
+                break;
+            default:
+                std::cerr << "ERROR: AckEvent request contains unknown event code: "
+                            << request_body.event_code << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+                break;
         }
-        // TODO:
     }
 
-    // response_body.status_code = result_code; // Removed
-    // response_body.message = message; // Removed
     service_helper.reply(
         *service_rpc,
         request,

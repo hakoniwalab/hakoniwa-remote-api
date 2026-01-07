@@ -12,15 +12,18 @@ class AckEventRequest:
 
     name: str
     event_code: int
+    result_code: int
 
     def __init__(self):
         self.name = ""
         self.event_code = 0
+        self.result_code = 0
 
     def __str__(self):
         return f"AckEventRequest(" + ", ".join([
             f"name={self.name}"
             f"event_code={self.event_code}"
+            f"result_code={self.result_code}"
         ]) + ")"
 
     def __repr__(self):
@@ -51,6 +54,16 @@ class AckEventRequest:
             d['event_code'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
         else:
             d['event_code'] = field_val
+        # handle field 'result_code'
+        field_val = self.result_code
+        if isinstance(field_val, bytearray):
+            d['result_code'] = list(field_val)
+        elif hasattr(field_val, 'to_dict'):
+            d['result_code'] = field_val.to_dict()
+        elif isinstance(field_val, list):
+            d['result_code'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
+        else:
+            d['result_code'] = field_val
         return d
 
     @classmethod
@@ -93,6 +106,23 @@ class AckEventRequest:
                 obj.event_code = field_type.from_dict(value)
             else:
                 obj.event_code = value
+        # handle field 'result_code'
+        if 'result_code' in d:
+            field_type = cls.__annotations__.get('result_code')
+            value = d['result_code']
+            
+            if field_type is bytearray:
+                obj.result_code = bytearray(value)
+            elif hasattr(field_type, '__origin__') and field_type.__origin__ is list:
+                list_item_type = field_type.__args__[0]
+                if hasattr(list_item_type, 'from_dict'):
+                    obj.result_code = [list_item_type.from_dict(item) for item in value]
+                else:
+                    obj.result_code = value
+            elif hasattr(field_type, 'from_dict'):
+                obj.result_code = field_type.from_dict(value)
+            else:
+                obj.result_code = value
         return obj
 
     def to_json(self, indent=2):

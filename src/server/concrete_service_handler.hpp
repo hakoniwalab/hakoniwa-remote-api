@@ -8,15 +8,18 @@ class JoinHandler : public IServiceHandler {
 public:
     ~JoinHandler() = default;
     void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
-    void cancel() override;
 };
 
 class GetSimStateHandler : public IServiceHandler {
 public:
     ~GetSimStateHandler() = default;
     void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
-    void cancel() override;
 };
 
+class SimControlHandler : public IServiceHandler {
+public:
+    ~SimControlHandler() = default;
+    void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
+};
 
 } // namespace hakoniwa::api

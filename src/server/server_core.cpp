@@ -1,6 +1,7 @@
 #include "hakoniwa/api/server_core.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
 #include "concrete_service_handler.hpp"
+#include "hakoniwa/hako_capi.h"
 #include <fstream>
 #include <iostream>
 #include <chrono>
@@ -31,6 +32,11 @@ bool ServerCore::initialize() {
     }
     if (is_initialized_.load()) {
         set_last_error("Server is already initialized.");
+        return false;
+    }
+    bool ret = hako_asset_init();
+    if (!ret) {
+        set_last_error("Failed to initialize Hako asset.");
         return false;
     }
 

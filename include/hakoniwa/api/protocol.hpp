@@ -15,5 +15,12 @@ enum class HakoSimulationState
     HakoSim_Count
 };
 
-}
+enum class HakoSimulationControlCommand
+{
+    HakoSimControl_Start = 0,
+    HakoSimControl_Stop,
+    HakoSimControl_Reset,
+    HakoSimControl_Count
 
+};
+}

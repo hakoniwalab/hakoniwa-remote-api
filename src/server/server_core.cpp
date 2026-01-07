@@ -173,16 +173,19 @@ bool ServerCore::stop() {
     std::cout << "Stopping Hakoniwa Remote API Server..." << std::endl;
     stop_requested_ = true;
 
+    std::cout << "Waiting for server threads to join..." << std::endl;
     if (serve_thread_.joinable()) {
         serve_thread_.join();
     }
+    std::cout << "Serve thread joined." << std::endl;
     if (service_handle_thread_.joinable()) {
         service_handle_thread_.join();
     }
-
+    std::cout << "Service handler thread joined." << std::endl;
     if (rpc_server_) {
         rpc_server_->stop_all_services();
     }
+    std::cout << "RPC services stopped." << std::endl;
     if (enable_conductor_ && conductor_thread_.joinable()) {
         conductor_thread_.join();
     }
@@ -207,6 +210,7 @@ void ServerCore::conductor_loop() {
 }
 
 void ServerCore::serve() {
+    std::cout << "Server serving thread started." << std::endl;
     while (!stop_requested_) {
         if (rpc_server_) {
             hakoniwa::pdu::rpc::RpcRequest request;
@@ -248,10 +252,12 @@ void ServerCore::serve() {
         }
         time_source_->sleep_delta_time();
     }
+    std::cout << "Server serving thread exit." << std::endl;
     handler_cv_.notify_all(); // for stop
 }
 
 void ServerCore::handle() {
+    std::cout << "Service handler thread started." << std::endl;
     while (!stop_requested_) {
         std::pair<std::string, hakoniwa::pdu::rpc::RpcRequest> job;
         bool has_job = false;
@@ -263,8 +269,8 @@ void ServerCore::handle() {
             });
 
             if (stop_requested_) {
-                std::cout << "Service handler thread stopping." << std::endl;
-                break;
+                std::cout << "Service handler thread exit." << std::endl;
+                return;
             }
 
             job = *pending_requests_.begin();

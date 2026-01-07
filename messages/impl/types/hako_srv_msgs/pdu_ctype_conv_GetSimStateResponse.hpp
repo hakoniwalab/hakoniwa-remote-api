@@ -28,6 +28,14 @@ static inline int _pdu2ros_GetSimStateResponse(const char* heap_ptr, Hako_GetSim
 {
     // primitive convert
     hako_convert_pdu2ros(src.sim_state, dst.sim_state);
+    // primitive convert
+    hako_convert_pdu2ros(src.master_time, dst.master_time);
+    // primitive convert
+    hako_convert_pdu2ros(src.is_pdu_created, dst.is_pdu_created);
+    // primitive convert
+    hako_convert_pdu2ros(src.is_simulation_mode, dst.is_simulation_mode);
+    // primitive convert
+    hako_convert_pdu2ros(src.is_pdu_sync_mode, dst.is_pdu_sync_mode);
     (void)heap_ptr;
     return 0;
 }
@@ -56,6 +64,14 @@ static inline bool _ros2pdu_GetSimStateResponse(hako_srv_msgs::msg::GetSimStateR
     try {
         // primitive convert
         hako_convert_ros2pdu(src.sim_state, dst.sim_state);
+        // primitive convert
+        hako_convert_ros2pdu(src.master_time, dst.master_time);
+        // primitive convert
+        hako_convert_ros2pdu(src.is_pdu_created, dst.is_pdu_created);
+        // primitive convert
+        hako_convert_ros2pdu(src.is_simulation_mode, dst.is_simulation_mode);
+        // primitive convert
+        hako_convert_ros2pdu(src.is_pdu_sync_mode, dst.is_pdu_sync_mode);
     } catch (const std::runtime_error& e) {
         std::cerr << "convertor error: " << e.what() << std::endl;
         return false;

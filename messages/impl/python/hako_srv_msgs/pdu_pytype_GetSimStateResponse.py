@@ -11,13 +11,25 @@ class GetSimStateResponse:
     """
 
     sim_state: int
+    master_time: int
+    is_pdu_created: bool
+    is_simulation_mode: bool
+    is_pdu_sync_mode: bool
 
     def __init__(self):
         self.sim_state = 0
+        self.master_time = 0
+        self.is_pdu_created = False
+        self.is_simulation_mode = False
+        self.is_pdu_sync_mode = False
 
     def __str__(self):
         return f"GetSimStateResponse(" + ", ".join([
             f"sim_state={self.sim_state}"
+            f"master_time={self.master_time}"
+            f"is_pdu_created={self.is_pdu_created}"
+            f"is_simulation_mode={self.is_simulation_mode}"
+            f"is_pdu_sync_mode={self.is_pdu_sync_mode}"
         ]) + ")"
 
     def __repr__(self):
@@ -38,6 +50,46 @@ class GetSimStateResponse:
             d['sim_state'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
         else:
             d['sim_state'] = field_val
+        # handle field 'master_time'
+        field_val = self.master_time
+        if isinstance(field_val, bytearray):
+            d['master_time'] = list(field_val)
+        elif hasattr(field_val, 'to_dict'):
+            d['master_time'] = field_val.to_dict()
+        elif isinstance(field_val, list):
+            d['master_time'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
+        else:
+            d['master_time'] = field_val
+        # handle field 'is_pdu_created'
+        field_val = self.is_pdu_created
+        if isinstance(field_val, bytearray):
+            d['is_pdu_created'] = list(field_val)
+        elif hasattr(field_val, 'to_dict'):
+            d['is_pdu_created'] = field_val.to_dict()
+        elif isinstance(field_val, list):
+            d['is_pdu_created'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
+        else:
+            d['is_pdu_created'] = field_val
+        # handle field 'is_simulation_mode'
+        field_val = self.is_simulation_mode
+        if isinstance(field_val, bytearray):
+            d['is_simulation_mode'] = list(field_val)
+        elif hasattr(field_val, 'to_dict'):
+            d['is_simulation_mode'] = field_val.to_dict()
+        elif isinstance(field_val, list):
+            d['is_simulation_mode'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
+        else:
+            d['is_simulation_mode'] = field_val
+        # handle field 'is_pdu_sync_mode'
+        field_val = self.is_pdu_sync_mode
+        if isinstance(field_val, bytearray):
+            d['is_pdu_sync_mode'] = list(field_val)
+        elif hasattr(field_val, 'to_dict'):
+            d['is_pdu_sync_mode'] = field_val.to_dict()
+        elif isinstance(field_val, list):
+            d['is_pdu_sync_mode'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in field_val]
+        else:
+            d['is_pdu_sync_mode'] = field_val
         return d
 
     @classmethod
@@ -63,6 +115,74 @@ class GetSimStateResponse:
                 obj.sim_state = field_type.from_dict(value)
             else:
                 obj.sim_state = value
+        # handle field 'master_time'
+        if 'master_time' in d:
+            field_type = cls.__annotations__.get('master_time')
+            value = d['master_time']
+            
+            if field_type is bytearray:
+                obj.master_time = bytearray(value)
+            elif hasattr(field_type, '__origin__') and field_type.__origin__ is list:
+                list_item_type = field_type.__args__[0]
+                if hasattr(list_item_type, 'from_dict'):
+                    obj.master_time = [list_item_type.from_dict(item) for item in value]
+                else:
+                    obj.master_time = value
+            elif hasattr(field_type, 'from_dict'):
+                obj.master_time = field_type.from_dict(value)
+            else:
+                obj.master_time = value
+        # handle field 'is_pdu_created'
+        if 'is_pdu_created' in d:
+            field_type = cls.__annotations__.get('is_pdu_created')
+            value = d['is_pdu_created']
+            
+            if field_type is bytearray:
+                obj.is_pdu_created = bytearray(value)
+            elif hasattr(field_type, '__origin__') and field_type.__origin__ is list:
+                list_item_type = field_type.__args__[0]
+                if hasattr(list_item_type, 'from_dict'):
+                    obj.is_pdu_created = [list_item_type.from_dict(item) for item in value]
+                else:
+                    obj.is_pdu_created = value
+            elif hasattr(field_type, 'from_dict'):
+                obj.is_pdu_created = field_type.from_dict(value)
+            else:
+                obj.is_pdu_created = value
+        # handle field 'is_simulation_mode'
+        if 'is_simulation_mode' in d:
+            field_type = cls.__annotations__.get('is_simulation_mode')
+            value = d['is_simulation_mode']
+            
+            if field_type is bytearray:
+                obj.is_simulation_mode = bytearray(value)
+            elif hasattr(field_type, '__origin__') and field_type.__origin__ is list:
+                list_item_type = field_type.__args__[0]
+                if hasattr(list_item_type, 'from_dict'):
+                    obj.is_simulation_mode = [list_item_type.from_dict(item) for item in value]
+                else:
+                    obj.is_simulation_mode = value
+            elif hasattr(field_type, 'from_dict'):
+                obj.is_simulation_mode = field_type.from_dict(value)
+            else:
+                obj.is_simulation_mode = value
+        # handle field 'is_pdu_sync_mode'
+        if 'is_pdu_sync_mode' in d:
+            field_type = cls.__annotations__.get('is_pdu_sync_mode')
+            value = d['is_pdu_sync_mode']
+            
+            if field_type is bytearray:
+                obj.is_pdu_sync_mode = bytearray(value)
+            elif hasattr(field_type, '__origin__') and field_type.__origin__ is list:
+                list_item_type = field_type.__args__[0]
+                if hasattr(list_item_type, 'from_dict'):
+                    obj.is_pdu_sync_mode = [list_item_type.from_dict(item) for item in value]
+                else:
+                    obj.is_pdu_sync_mode = value
+            elif hasattr(field_type, 'from_dict'):
+                obj.is_pdu_sync_mode = field_type.from_dict(value)
+            else:
+                obj.is_pdu_sync_mode = value
         return obj
 
     def to_json(self, indent=2):

@@ -106,6 +106,10 @@ void GetSimStateHandler::handle(
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
     response_body.sim_state =
         static_cast<Hako_uint32>(hako_simevent_get_state());
+    response_body.master_time = static_cast<int64_t>(hako_asset_get_worldtime());
+    response_body.is_pdu_created = hako_asset_is_pdu_created();
+    response_body.is_simulation_mode = hako_asset_is_simulation_mode();
+    response_body.is_pdu_sync_mode = hako_asset_is_pdu_sync_mode(request.client_name.c_str());
   } else {
     response_body.sim_state = -1; // Indicate error
   }

@@ -7,10 +7,22 @@
 export class GetSimStateResponse {
 /** @type { number } */
     sim_state;
+/** @type { bigint } */
+    master_time;
+/** @type { boolean } */
+    is_pdu_created;
+/** @type { boolean } */
+    is_simulation_mode;
+/** @type { boolean } */
+    is_pdu_sync_mode;
 
 
     constructor() {
         this.sim_state = 0;
+        this.master_time = 0n;
+        this.is_pdu_created = false;
+        this.is_simulation_mode = false;
+        this.is_pdu_sync_mode = false;
     }
 
     /**
@@ -29,6 +41,50 @@ export class GetSimStateResponse {
                 d['sim_state'] = field_val;
             }
         }
+        {
+            // handle field 'master_time'
+            const field_val = this.master_time;
+            if (typeof field_val?.toDict === 'function') {
+                d['master_time'] = field_val.toDict();
+            } else if (Array.isArray(field_val)) {
+                d['master_time'] = field_val.map(item => typeof item?.toDict === 'function' ? item.toDict() : item);
+            } else {
+                d['master_time'] = field_val;
+            }
+        }
+        {
+            // handle field 'is_pdu_created'
+            const field_val = this.is_pdu_created;
+            if (typeof field_val?.toDict === 'function') {
+                d['is_pdu_created'] = field_val.toDict();
+            } else if (Array.isArray(field_val)) {
+                d['is_pdu_created'] = field_val.map(item => typeof item?.toDict === 'function' ? item.toDict() : item);
+            } else {
+                d['is_pdu_created'] = field_val;
+            }
+        }
+        {
+            // handle field 'is_simulation_mode'
+            const field_val = this.is_simulation_mode;
+            if (typeof field_val?.toDict === 'function') {
+                d['is_simulation_mode'] = field_val.toDict();
+            } else if (Array.isArray(field_val)) {
+                d['is_simulation_mode'] = field_val.map(item => typeof item?.toDict === 'function' ? item.toDict() : item);
+            } else {
+                d['is_simulation_mode'] = field_val;
+            }
+        }
+        {
+            // handle field 'is_pdu_sync_mode'
+            const field_val = this.is_pdu_sync_mode;
+            if (typeof field_val?.toDict === 'function') {
+                d['is_pdu_sync_mode'] = field_val.toDict();
+            } else if (Array.isArray(field_val)) {
+                d['is_pdu_sync_mode'] = field_val.map(item => typeof item?.toDict === 'function' ? item.toDict() : item);
+            } else {
+                d['is_pdu_sync_mode'] = field_val;
+            }
+        }
         return d;
     }
 
@@ -40,6 +96,18 @@ export class GetSimStateResponse {
         const obj = new GetSimStateResponse();
         if (d.hasOwnProperty('sim_state')) {
             obj.sim_state = d.sim_state;
+        }
+        if (d.hasOwnProperty('master_time')) {
+            obj.master_time = d.master_time;
+        }
+        if (d.hasOwnProperty('is_pdu_created')) {
+            obj.is_pdu_created = d.is_pdu_created;
+        }
+        if (d.hasOwnProperty('is_simulation_mode')) {
+            obj.is_simulation_mode = d.is_simulation_mode;
+        }
+        if (d.hasOwnProperty('is_pdu_sync_mode')) {
+            obj.is_pdu_sync_mode = d.is_pdu_sync_mode;
         }
         return obj;
     }

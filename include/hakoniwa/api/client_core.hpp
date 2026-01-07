@@ -40,7 +40,7 @@ public:
    * @param[out] state The current simulation state.
    * @return true on success, false on failure.
    */
-  bool get_sim_state(HakoSimulationState &state);
+  bool get_sim_state(HakoSimulationStateInfo &state);
 
   /**
    * @brief Send a simulation control command.

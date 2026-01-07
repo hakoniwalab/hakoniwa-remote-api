@@ -29,6 +29,38 @@ export function binary_read_recursive_GetSimStateResponse(meta, binary_data, js_
         js_obj.sim_state = PduUtils.binToValue("uint32", bin);
     }
     
+    // member: master_time, type: int64 (primitive)
+
+    
+    {
+        const bin = PduUtils.readBinary(binary_data, base_off + 8, 8);
+        js_obj.master_time = PduUtils.binToValue("int64", bin);
+    }
+    
+    // member: is_pdu_created, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.readBinary(binary_data, base_off + 16, 4);
+        js_obj.is_pdu_created = PduUtils.binToValue("bool", bin);
+    }
+    
+    // member: is_simulation_mode, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.readBinary(binary_data, base_off + 20, 4);
+        js_obj.is_simulation_mode = PduUtils.binToValue("bool", bin);
+    }
+    
+    // member: is_pdu_sync_mode, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.readBinary(binary_data, base_off + 24, 4);
+        js_obj.is_pdu_sync_mode = PduUtils.binToValue("bool", bin);
+    }
+    
     return js_obj;
 }
 
@@ -67,6 +99,38 @@ export function binary_write_recursive_GetSimStateResponse(parent_off, bw_contai
     {
         const bin = PduUtils.typeToBin("uint32", js_obj.sim_state, 4);
         allocator.add(bin, parent_off + 0);
+    }
+    
+    // member: master_time, type: int64 (primitive)
+
+    
+    {
+        const bin = PduUtils.typeToBin("int64", js_obj.master_time, 8);
+        allocator.add(bin, parent_off + 8);
+    }
+    
+    // member: is_pdu_created, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.typeToBin("bool", js_obj.is_pdu_created, 4);
+        allocator.add(bin, parent_off + 16);
+    }
+    
+    // member: is_simulation_mode, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.typeToBin("bool", js_obj.is_simulation_mode, 4);
+        allocator.add(bin, parent_off + 20);
+    }
+    
+    // member: is_pdu_sync_mode, type: bool (primitive)
+
+    
+    {
+        const bin = PduUtils.typeToBin("bool", js_obj.is_pdu_sync_mode, 4);
+        allocator.add(bin, parent_off + 24);
     }
     
 }

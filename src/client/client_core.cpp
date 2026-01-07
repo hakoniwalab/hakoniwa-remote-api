@@ -194,7 +194,7 @@ bool ClientCore::join() {
   }
   return true;
 }
-bool ClientCore::get_sim_state(HakoSimulationState &state) {
+bool ClientCore::get_sim_state(HakoSimulationStateInfo &state) {
     if (!is_initialized_) {
         set_last_error("Client is not initialized.");
         return false;
@@ -220,7 +220,11 @@ bool ClientCore::get_sim_state(HakoSimulationState &state) {
         return false;
     }
 
-    state = static_cast<HakoSimulationState>(response_body.sim_state);
+    state.sim_state = static_cast<HakoSimulationState>(response_body.sim_state);
+    state.master_time = response_body.master_time;
+    state.is_pdu_created = response_body.is_pdu_created;
+    state.is_simulation_mode = response_body.is_simulation_mode;
+    state.is_pdu_sync_mode = response_body.is_pdu_sync_mode;
     return true;
 }
 

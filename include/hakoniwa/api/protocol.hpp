@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 namespace hakoniwa::api {
 
 enum class HakoSimulationState
@@ -13,6 +14,15 @@ enum class HakoSimulationState
     HakoSim_Terminated,
     HakoSim_Any,
     HakoSim_Count
+};
+
+struct HakoSimulationStateInfo
+{
+    HakoSimulationState sim_state;
+    int64_t master_time;
+    bool is_pdu_created;
+    bool is_simulation_mode;
+    bool is_pdu_sync_mode;
 };
 
 enum class HakoSimulationControlCommand

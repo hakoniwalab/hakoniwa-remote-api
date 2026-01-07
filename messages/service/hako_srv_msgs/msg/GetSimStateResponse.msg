@@ -1,1 +1,5 @@
 uint32 sim_state
+int64 master_time
+bool is_pdu_created
+bool is_simulation_mode
+bool is_pdu_sync_mode

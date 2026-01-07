@@ -36,11 +36,11 @@ def binary_read_recursive_GetSimStateResponsePacket(meta: binary_io.PduMetaData,
     # data_type: struct 
     # member_name: body 
     # type_name: GetSimStateResponse 
-    # offset: 268 size: 4 
+    # offset: 272 size: 32 
     # array_len: 1
 
     tmp_py_obj = GetSimStateResponse()
-    binary_read_recursive_GetSimStateResponse(meta, binary_data, tmp_py_obj, base_off + 268)
+    binary_read_recursive_GetSimStateResponse(meta, binary_data, tmp_py_obj, base_off + 272)
     py_obj.body = tmp_py_obj
     
     return py_obj
@@ -90,10 +90,10 @@ def binary_write_recursive_GetSimStateResponsePacket(parent_off: int, bw_contain
     # data_type: struct 
     # member_name: body 
     # type_name: GetSimStateResponse 
-    # offset: 268 size: 4 
+    # offset: 272 size: 32 
     # array_len: 1
     type = "GetSimStateResponse"
-    off = 268
+    off = 272
 
     binary_write_recursive_GetSimStateResponse(parent_off + off, bw_container, allocator, py_obj.body)
     

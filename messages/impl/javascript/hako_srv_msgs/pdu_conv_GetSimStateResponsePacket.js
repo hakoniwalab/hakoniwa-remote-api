@@ -37,7 +37,7 @@ export function binary_read_recursive_GetSimStateResponsePacket(meta, binary_dat
 
     {
         const tmp_obj = new GetSimStateResponse();
-        binary_read_recursive_GetSimStateResponse(meta, binary_data, tmp_obj, base_off + 268);
+        binary_read_recursive_GetSimStateResponse(meta, binary_data, tmp_obj, base_off + 272);
         js_obj.body = tmp_obj;
     }
     
@@ -82,7 +82,7 @@ export function binary_write_recursive_GetSimStateResponsePacket(parent_off, bw_
     // member: body, type: GetSimStateResponse (struct)
 
     {
-        binary_write_recursive_GetSimStateResponse(parent_off + 268, bw_container, allocator, js_obj.body);
+        binary_write_recursive_GetSimStateResponse(parent_off + 272, bw_container, allocator, js_obj.body);
     }
     
 }

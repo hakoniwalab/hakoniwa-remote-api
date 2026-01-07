@@ -30,6 +30,50 @@ def binary_read_recursive_GetSimStateResponse(meta: binary_io.PduMetaData, binar
     bin = binary_io.readBinary(binary_data, base_off + 0, 4)
     py_obj.sim_state = binary_io.binTovalue("uint32", bin)
     
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: master_time 
+    # type_name: int64 
+    # offset: 8 size: 8 
+    # array_len: 1
+
+    
+    bin = binary_io.readBinary(binary_data, base_off + 8, 8)
+    py_obj.master_time = binary_io.binTovalue("int64", bin)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_pdu_created 
+    # type_name: bool 
+    # offset: 16 size: 4 
+    # array_len: 1
+
+    
+    bin = binary_io.readBinary(binary_data, base_off + 16, 4)
+    py_obj.is_pdu_created = binary_io.binTovalue("bool", bin)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_simulation_mode 
+    # type_name: bool 
+    # offset: 20 size: 4 
+    # array_len: 1
+
+    
+    bin = binary_io.readBinary(binary_data, base_off + 20, 4)
+    py_obj.is_simulation_mode = binary_io.binTovalue("bool", bin)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_pdu_sync_mode 
+    # type_name: bool 
+    # offset: 24 size: 4 
+    # array_len: 1
+
+    
+    bin = binary_io.readBinary(binary_data, base_off + 24, 4)
+    py_obj.is_pdu_sync_mode = binary_io.binTovalue("bool", bin)
+    
     return py_obj
 
 
@@ -73,6 +117,62 @@ def binary_write_recursive_GetSimStateResponse(parent_off: int, bw_container: Bi
 
     
     bin = binary_io.typeTobin(type, py_obj.sim_state)
+    bin = get_binary(type, bin, 4)
+    allocator.add(bin, expected_offset=parent_off + off)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: master_time 
+    # type_name: int64 
+    # offset: 8 size: 8 
+    # array_len: 1
+    type = "int64"
+    off = 8
+
+    
+    bin = binary_io.typeTobin(type, py_obj.master_time)
+    bin = get_binary(type, bin, 8)
+    allocator.add(bin, expected_offset=parent_off + off)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_pdu_created 
+    # type_name: bool 
+    # offset: 16 size: 4 
+    # array_len: 1
+    type = "bool"
+    off = 16
+
+    
+    bin = binary_io.typeTobin(type, py_obj.is_pdu_created)
+    bin = get_binary(type, bin, 4)
+    allocator.add(bin, expected_offset=parent_off + off)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_simulation_mode 
+    # type_name: bool 
+    # offset: 20 size: 4 
+    # array_len: 1
+    type = "bool"
+    off = 20
+
+    
+    bin = binary_io.typeTobin(type, py_obj.is_simulation_mode)
+    bin = get_binary(type, bin, 4)
+    allocator.add(bin, expected_offset=parent_off + off)
+    
+    # array_type: single 
+    # data_type: primitive 
+    # member_name: is_pdu_sync_mode 
+    # type_name: bool 
+    # offset: 24 size: 4 
+    # array_len: 1
+    type = "bool"
+    off = 24
+
+    
+    bin = binary_io.typeTobin(type, py_obj.is_pdu_sync_mode)
     bin = get_binary(type, bin, 4)
     allocator.add(bin, expected_offset=parent_off + off)
     

@@ -22,8 +22,8 @@
 namespace hakoniwa::api {
 
 
-ClientCore::ClientCore(std::string client_name, std::string config_path)
-    : client_name_(std::move(client_name)),
+ClientCore::ClientCore(std::string node_id, std::string config_path)
+    : node_id_(std::move(node_id)),
       config_path_(std::move(config_path)) {}
 
 ClientCore::~ClientCore() {
@@ -48,19 +48,35 @@ bool ClientCore::initialize() {
     ifs >> config;
 
     // Check for client and server node IDs
-    if (!config.contains("client") || !config["client"].is_object() ||
-        !config["client"].contains("nodeId") ||
-        !config["client"]["nodeId"].is_string()) {
+    if (!config.contains("participants") || !config["participants"].is_array()) {
       set_last_error(
           "Config error: 'client.nodeId' not found or not a string.");
       return false;
     }
-    std::string config_client_id = config["client"]["nodeId"];
-    if (config_client_id != client_name_) {
-        set_last_error("Config error: client name mismatch. Provided: '" + client_name_ + "', Config: '" + config_client_id + "'");
+    bool client_found = false;
+    for (const auto& item : config["participants"].items()) {
+        if (!item.value().is_object() ||
+            !item.value().contains("name") ||
+            !item.value().contains("nodeId") ||
+            !item.value().contains("server_nodeId") ||
+            !item.value().contains("delta_time_usec") ||
+            !item.value()["nodeId"].is_string()) {
+          set_last_error("Config error: 'participants' entry malformed.");
+          return false;
+        }
+        if (item.value()["nodeId"] == node_id_) {
+            client_name_ = item.value()["name"];
+            server_node_id_ = item.value()["server_nodeId"];
+            delta_time_usec_ = item.value()["delta_time_usec"];
+            std::cout << "Client node ID: " << client_name_ << ", Server node ID: " << server_node_id_ << ", Delta time (usec): " << delta_time_usec_ << std::endl;
+            client_found = true;
+            break;
+        }
+    }
+    if (!client_found) {
+        set_last_error("Config error: client nodeId '" + node_id_ + "' not found in participants.");
         return false;
     }
-
 
     if (!config.contains("server") || !config["server"].is_object() ||
         !config["server"].contains("nodeId") ||
@@ -69,7 +85,6 @@ bool ClientCore::initialize() {
           "Config error: 'server.nodeId' not found or not a string.");
       return false;
     }
-    server_node_id_ = config["server"]["nodeId"];
 
     // Check for RPC service config path
     if (!config.contains("rpc_service_config_path") ||
@@ -98,7 +113,7 @@ bool ClientCore::initialize() {
   // 2. Initialize RPC Client
   try {
     rpc_client_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesClient>(
-        client_name_, "RpcClientEndpointImpl", rpc_config_path_);
+        node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", delta_time_usec_, "hakoniwa");
     if (!rpc_client_->initialize_services()) {
       set_last_error("Failed to initialize RPC client.");
       rpc_client_.reset();

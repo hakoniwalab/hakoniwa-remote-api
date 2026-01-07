@@ -3,6 +3,7 @@
 #include "hakoniwa/api/protocol.hpp"
 #include <memory>
 #include <string>
+#include <cstdint>
 #include "hakoniwa/pdu/rpc/rpc_service_helper.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_client.hpp" // Directly include for full definition
 
@@ -13,10 +14,10 @@ public:
   /**
    * @brief Construct a new Client Core object
    *
-   * @param client_name The name of this client node.
+   * @param node_id The ID of this client node.
    * @param config_path Path to the remote-api.json configuration file.
    */
-  explicit ClientCore(std::string client_name, std::string config_path);
+  explicit ClientCore(std::string node_id, std::string config_path);
   ~ClientCore();
 
   /**
@@ -72,7 +73,9 @@ public:
 private:
     void set_last_error(const std::string &msg);
     bool wait_response_for(const std::string& expected_service, hakoniwa::pdu::rpc::RpcResponse& out_resp);
+    std::string node_id_;
     std::string client_name_;
+    uint64_t delta_time_usec_{1000};
     std::string config_path_;
     std::string server_node_id_;
     std::string rpc_config_path_;

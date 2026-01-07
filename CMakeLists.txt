@@ -66,3 +66,24 @@ target_link_directories(server
   PRIVATE
     /usr/local/hakoniwa/lib
 )
+
+add_executable(client 
+  src/main/client.cpp
+)
+target_include_directories(client
+  PUBLIC
+    include
+    /usr/local/hakoniwa/include
+    messages/impl/types
+)
+target_link_libraries(client
+  PRIVATE
+    ${PROJECT_NAME}
+    nlohmann_json::nlohmann_json
+    hakoniwa_pdu_rpc
+    shakoc
+)
+target_link_directories(client
+  PRIVATE
+    /usr/local/hakoniwa/lib
+)

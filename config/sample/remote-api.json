@@ -11,12 +11,14 @@
         {
             "name": "client-01",
             "nodeId": "node1",
+            "server_nodeId": "node0",
             "role": "conductor",
             "delta_time_usec": 10000
         },
         {
             "name": "client-02",
             "nodeId": "node2",
+            "server_nodeId": "node0",
             "role": "conductor",
             "delta_time_usec": 20000
         }

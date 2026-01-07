@@ -53,7 +53,7 @@
       ],
       "clients": [
         {
-          "name": "TestClient1",
+          "name": "client-01",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {
@@ -85,7 +85,7 @@
       ],
       "clients": [
         {
-          "name": "TestClient1",
+          "name": "client-01",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {
@@ -117,7 +117,7 @@
       ],
       "clients": [
         {
-          "name": "TestClient1",
+          "name": "client-01",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {
@@ -149,7 +149,7 @@
       ],
       "clients": [
         {
-          "name": "TestClient1",
+          "name": "client-01",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {
@@ -181,7 +181,7 @@
       ],
       "clients": [
         {
-          "name": "TestClient1",
+          "name": "client-01",
           "requestChannelId": 1,
           "responseChannelId": 2,
           "client_endpoint": {

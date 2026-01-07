@@ -24,6 +24,19 @@ void JoinHandler::handle(
                 ServerServiceContextStatus::SERVER_SERVICE_STARTED);
         }
     }
+    if (request.client_name != service_context.get_client_node_id()) {
+        std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                  << service_context.get_client_node_id()
+                  << "', got '" << request.client_name << "'." << std::endl;
+        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+    }
+
+    auto ret = hako_asset_register_polling(service_context.get_client_node_id().c_str());
+    if (!ret) {
+        std::cerr << "ERROR: Failed to register asset polling for client '"
+                  << service_context.get_client_node_id() << "'." << std::endl;
+        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
+    }
 
     hakoniwa::pdu::rpc::PduData reply_pdu;
     service_rpc->create_reply_buffer(

@@ -18,7 +18,7 @@ namespace hakoniwa::api {
 
 class ServerCore {
 public:
-    ServerCore(std::string config_path);
+    ServerCore(std::string config_path, std::string client_node_id);
     ~ServerCore(); // stop() して join する前提
 
     bool initialize(); // if needed in future
@@ -59,7 +59,6 @@ private:
     std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_requests_;
 
     ServerContext server_context_;
-    nlohmann::json config_;
 
 };
 

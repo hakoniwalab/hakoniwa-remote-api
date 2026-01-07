@@ -9,10 +9,11 @@
 
 namespace hakoniwa::api {
 
-ServerCore::ServerCore(std::string config_path)
+ServerCore::ServerCore(std::string config_path, std::string client_node_id)
     : config_path_(std::move(config_path)) {
     // Constructor initializes the config path.
     // The rest of the initialization happens in start().
+    server_context_.set_client_node_id(std::move(client_node_id));
 }
 
 ServerCore::~ServerCore() {
@@ -40,6 +41,7 @@ bool ServerCore::initialize() {
             set_last_error("Failed to open config file: " + config_path_);
             return false;
         }
+        auto& config_ = server_context_.get_config();
         ifs >> config_;
 
         // Check for "server" and "server.nodeId"

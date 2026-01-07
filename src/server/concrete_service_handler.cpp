@@ -1,4 +1,5 @@
 #include "concrete_service_handler.hpp"
+#include "hakoniwa/hako_capi.h"
 
 namespace hakoniwa::api {
 

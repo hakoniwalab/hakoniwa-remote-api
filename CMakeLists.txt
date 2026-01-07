@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     include
+    /usr/local/hakoniwa/include
 )
 
 # Link against the submodule library

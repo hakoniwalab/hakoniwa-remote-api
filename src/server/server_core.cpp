@@ -1,7 +1,6 @@
 #include "hakoniwa/api/server_core.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
 #include "concrete_service_handler.hpp"
-#include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
 #include <chrono>
@@ -36,42 +35,41 @@ bool ServerCore::initialize() {
 
     // 1. Parse remote-api.json config and extract values
     try {
-        nlohmann::json config;
         std::ifstream ifs(config_path_);
         if (!ifs.is_open()) {
             set_last_error("Failed to open config file: " + config_path_);
             return false;
         }
-        ifs >> config;
+        ifs >> config_;
 
         // Check for "server" and "server.nodeId"
-        if (!config.contains("server") || !config["server"].is_object()) {
+        if (!config_.contains("server") || !config_["server"].is_object()) {
             set_last_error("Config error: 'server' object not found or not an object.");
             return false;
         }
-        if (!config["server"].contains("nodeId") || !config["server"]["nodeId"].is_string()) {
+        if (!config_["server"].contains("nodeId") || !config_["server"]["nodeId"].is_string()) {
             set_last_error("Config error: 'server.nodeId' not found or not a string.");
             return false;
         }
-        node_id_ = config["server"]["nodeId"];
+        node_id_ = config_["server"]["nodeId"];
 
         // Check for "delta_time_usec"
-        if (!config.contains("delta_time_usec") || !config["delta_time_usec"].is_number_unsigned()) {
+        if (!config_.contains("delta_time_usec") || !config_["delta_time_usec"].is_number_unsigned()) {
             set_last_error("Config error: 'delta_time_usec' not found or not an unsigned number.");
             return false;
         }
-        delta_time_usec_ = config["delta_time_usec"].get<uint64_t>();
+        delta_time_usec_ = config_["delta_time_usec"].get<uint64_t>();
         if (delta_time_usec_ == 0) {
             set_last_error("Config error: 'delta_time_usec' must be greater than 0.");
             return false;
         }
 
         // Check for "time_source_type"
-        if (!config.contains("time_source_type") || !config["time_source_type"].is_string()) {
+        if (!config_.contains("time_source_type") || !config_["time_source_type"].is_string()) {
             set_last_error("Config error: 'time_source_type' not found or not a string.");
             return false;
         }
-        std::string time_source_type = config["time_source_type"];
+        std::string time_source_type = config_["time_source_type"];
         time_source_ = hakoniwa::time_source::create_time_source(time_source_type, delta_time_usec_);
         if (!time_source_) {
             set_last_error("Config error: Invalid 'time_source_type': " + time_source_type);
@@ -79,12 +77,12 @@ bool ServerCore::initialize() {
         }
         
         // Check for "rpc_service_config_path"
-        if (!config.contains("rpc_service_config_path") || !config["rpc_service_config_path"].is_string()) {
+        if (!config_.contains("rpc_service_config_path") || !config_["rpc_service_config_path"].is_string()) {
             set_last_error("Config error: 'rpc_service_config_path' not found or not a string.");
             return false;
         }
         std::filesystem::path base_path = std::filesystem::path(config_path_).parent_path();
-        rpc_config_path_ = (base_path / config["rpc_service_config_path"].get<std::string>()).string();
+        rpc_config_path_ = (base_path / config_["rpc_service_config_path"].get<std::string>()).string();
 
         // service handlers registration
         handlers_["HakoRemoteApi/Join"] = std::make_unique<JoinHandler>();

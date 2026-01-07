@@ -6,6 +6,8 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <nlohmann/json.hpp>
+
 #include "hakoniwa/api/iservice_handler.hpp"
 #include "hakoniwa/api/server_context.hpp"
 
@@ -57,6 +59,8 @@ private:
     std::unordered_map<std::string, hakoniwa::pdu::rpc::RpcRequest> pending_requests_;
 
     ServerContext server_context_;
+    nlohmann::json config_;
+
 };
 
 } // namespace hakoniwa::api

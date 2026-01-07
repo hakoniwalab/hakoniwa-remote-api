@@ -22,4 +22,16 @@ public:
     void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
 };
 
+class GetEventHandler : public IServiceHandler {
+public:
+    ~GetEventHandler() = default;
+    void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
+};
+
+class AckEventHandler : public IServiceHandler {
+public:
+    ~AckEventHandler() = default;
+    void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) override;
+};
+
 } // namespace hakoniwa::api

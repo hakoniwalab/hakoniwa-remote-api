@@ -10,6 +10,11 @@
 #include "hako_srv_msgs/pdu_cpptype_conv_SimControlRequestPacket.hpp"
 #include "hako_srv_msgs/pdu_cpptype_conv_SimControlResponsePacket.hpp"
 
+#include "hako_srv_msgs/pdu_cpptype_conv_GetEventRequestPacket.hpp"
+#include "hako_srv_msgs/pdu_cpptype_conv_GetEventResponsePacket.hpp"
+#include "hako_srv_msgs/pdu_cpptype_conv_AckEventRequestPacket.hpp"
+#include "hako_srv_msgs/pdu_cpptype_conv_AckEventResponsePacket.hpp"
+
 #include "hakoniwa/pdu/rpc/rpc_service_helper.hpp"
 
 namespace hakoniwa::api {
@@ -181,4 +186,93 @@ void SimControlHandler::handle(
         result_code,
         response_body);
 }
+
+void GetEventHandler::handle(
+    ServerContext& service_context,
+    std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,
+    hakoniwa::pdu::rpc::RpcRequest& request)
+{
+    HakoRpcServiceServerTemplateType(GetEvent) service_helper;
+    // std::string message = "GetEvent request Sccessed."; // Removed
+    std::cout << "Handling get_event request from client: "
+              << request.client_name << std::endl;
+
+    Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        if (request.client_name != service_context.get_client_node_id()) {
+            std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                      << service_context.get_client_node_id()
+                      << "', got '" << request.client_name << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            // message = "Client node ID mismatch."; // Removed
+        }
+    }
+    HakoCpp_GetEventResponse response_body;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        // HakoCpp_GetEventRequest request_body; // Temporarily commented out as includes were removed
+        // auto ret = service_helper.get_request_body(request, request_body); // Temporarily commented out
+        bool ret = true; // Placeholder
+        if (!ret) {
+            std::cerr << "ERROR: Failed to get GetEvent request body." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            // message = "Invalid GetEvent request body."; // Removed
+        }
+        // TODO:
+    }
+
+    // response_body.status_code = result_code; // Removed
+    // TODO:
+    service_helper.reply(
+        *service_rpc,
+        request,
+        hakoniwa::pdu::rpc::HAKO_SERVICE_STATUS_DONE,
+        result_code,
+        response_body);
+}
+
+void AckEventHandler::handle(
+    ServerContext& service_context,
+    std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,
+    hakoniwa::pdu::rpc::RpcRequest& request)
+{
+    HakoRpcServiceServerTemplateType(AckEvent) service_helper;
+    // std::string message = "AckEvent request Sccessed."; // Removed
+    std::cout << "Handling ack_event request from client: "
+              << request.client_name << std::endl;
+
+    Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        if (request.client_name != service_context.get_client_node_id()) {
+            std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                      << service_context.get_client_node_id()
+                      << "', got '" << request.client_name << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            // message = "Client node ID mismatch."; // Removed
+        }
+    }
+
+    HakoCpp_AckEventResponse response_body;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        // HakoCpp_AckEventRequest request_body; // Temporarily commented out as includes were removed
+        // auto ret = service_helper.get_request_body(request, request_body); // Temporarily commented out
+        bool ret = true; // Placeholder
+        if (!ret) {
+            std::cerr << "ERROR: Failed to get AckEvent request body." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            // message = "Invalid AckEvent request body."; // Removed
+        }
+        // TODO:
+    }
+
+    // response_body.status_code = result_code; // Removed
+    // response_body.message = message; // Removed
+    service_helper.reply(
+        *service_rpc,
+        request,
+        hakoniwa::pdu::rpc::HAKO_SERVICE_STATUS_DONE,
+        result_code,
+        response_body);
+}
+
+
 }

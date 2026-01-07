@@ -9,8 +9,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(hakoniwa-pdu-rpc build/hakoniwa-pdu-rpc)
 
 # Add the source files to the library
-file(GLOB_RECURSE SOURCES "src/**/*.cpp")
-add_library(${PROJECT_NAME} ${SOURCES})
+
+add_library(${PROJECT_NAME}
+  src/server/server_core.cpp
+  src/server/concrete_service_handler.cpp
+  src/client/client_core.cpp
+)
 
 # Target-specific include directories
 target_include_directories(${PROJECT_NAME}
@@ -31,3 +35,34 @@ target_link_libraries(${PROJECT_NAME}
 # Tests
 enable_testing()
 add_subdirectory(test)
+
+
+include(FetchContent)
+
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+)
+
+FetchContent_MakeAvailable(nlohmann_json)
+add_executable(server 
+  src/main/server.cpp
+)
+target_include_directories(server
+  PUBLIC
+    include
+    /usr/local/hakoniwa/include
+    messages/impl/types
+)
+target_link_libraries(server
+  PRIVATE
+    ${PROJECT_NAME}
+    nlohmann_json::nlohmann_json
+    hakoniwa_pdu_rpc
+    shakoc
+)
+target_link_directories(server
+  PRIVATE
+    /usr/local/hakoniwa/lib
+)

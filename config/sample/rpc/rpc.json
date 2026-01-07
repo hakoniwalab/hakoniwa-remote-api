@@ -45,7 +45,7 @@
           "baseSize": 400
         }
       },
-      "server_endpoint": [
+      "server_endpoints": [
         {
         "nodeId": "node0",
         "endpointId": "server_ep_id"

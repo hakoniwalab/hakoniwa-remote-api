@@ -10,8 +10,8 @@
 
 namespace hakoniwa::api {
 
-ServerCore::ServerCore(std::string config_path, std::string client_node_id)
-    : config_path_(std::move(config_path)) {
+ServerCore::ServerCore(std::string config_path, std::string client_node_id, bool enable_conductor)
+    : config_path_(std::move(config_path)), enable_conductor_(enable_conductor) {
     // Constructor initializes the config path.
     // The rest of the initialization happens in start().
     server_context_.set_client_node_id(std::move(client_node_id));
@@ -32,11 +32,6 @@ bool ServerCore::initialize() {
     }
     if (is_initialized_.load()) {
         set_last_error("Server is already initialized.");
-        return false;
-    }
-    bool ret = hako_asset_init();
-    if (!ret) {
-        set_last_error("Failed to initialize Hako asset.");
         return false;
     }
 
@@ -69,6 +64,28 @@ bool ServerCore::initialize() {
         delta_time_usec_ = config_["delta_time_usec"].get<uint64_t>();
         if (delta_time_usec_ == 0) {
             set_last_error("Config error: 'delta_time_usec' must be greater than 0.");
+            return false;
+        }
+        if (!config_.contains("max_delay_time_usec") || !config_["max_delay_time_usec"].is_number_unsigned()) {
+            set_last_error("Config error: 'max_delay_time_usec' not found or not an unsigned number.");
+            return false;
+        }
+        uint64_t max_delay_time_usec = config_["max_delay_time_usec"].get<uint64_t>();
+        if (max_delay_time_usec < delta_time_usec_) {
+            set_last_error("Config error: 'max_delay_time_usec' must be greater than or equal to 'delta_time_usec'.");
+            return false;
+        }
+        if (enable_conductor_) {
+            std::cout << "Conductor mode enabled." << std::endl;
+            if (hako_master_init() == false) {
+                set_last_error("Failed to initialize Hako master.");
+                return false;
+            }
+            hako_master_set_config_simtime(max_delay_time_usec_, delta_time_usec_);
+        }
+        bool ret = hako_asset_init();
+        if (!ret) {
+            set_last_error("Failed to initialize Hako asset.");
             return false;
         }
 

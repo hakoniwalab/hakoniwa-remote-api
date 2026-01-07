@@ -18,7 +18,7 @@ namespace hakoniwa::api {
 
 class ServerCore {
 public:
-    ServerCore(std::string config_path, std::string client_node_id);
+    ServerCore(std::string config_path, std::string client_node_id, bool enable_conductor = false);
     ~ServerCore(); // stop() して join する前提
 
     bool initialize(); // if needed in future
@@ -39,10 +39,12 @@ private:
     std::string last_error_;
     std::string rpc_config_path_;
     uint64_t delta_time_usec_{1000};
+    uint64_t max_delay_time_usec_{10000};
 
     std::atomic<bool> is_running_{false};
     std::atomic<bool> stop_requested_{false};
     std::atomic<bool> is_initialized_{false};
+    bool enable_conductor_{false};
 
     std::mutex start_mutex_;
     mutable std::mutex err_mutex_;

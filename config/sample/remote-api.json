@@ -5,7 +5,8 @@
         "nodeId": "node0" 
     },
     "time_source_type": "real",
-    "delta_time_usec": 10000,
+    "delta_time_usec": 1000,
+    "max_delay_time_usec": 20000,
     "participants": [
         {
             "name": "client-01",

@@ -11,6 +11,7 @@
     "server",
     "time_source_type",
     "delta_time_usec",
+    "max_delay_time_usec",
     "participants"
   ],
 
@@ -40,6 +41,10 @@
       "enum": ["real", "virtual", "hakoniwa"]
     },
     "delta_time_usec": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_delay_time_usec": {
       "type": "integer",
       "minimum": 1
     },

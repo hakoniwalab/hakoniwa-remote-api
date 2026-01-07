@@ -26,7 +26,7 @@ void JoinHandler::handle(
 
     Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
 
-    {
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
         std::lock_guard<std::mutex> lock(service_context.get_mutex());
         if (service_context.get_status()
             != ServerServiceContextStatus::SERVER_SERVICE_NOT_READY)
@@ -38,28 +38,32 @@ void JoinHandler::handle(
                 ServerServiceContextStatus::SERVER_SERVICE_STARTED);
         }
     }
-    if (request.client_name != service_context.get_client_node_id()) {
-        std::cerr << "WARNING: Client node ID mismatch. Expected '"
-                  << service_context.get_client_node_id()
-                  << "', got '" << request.client_name << "'." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-        message = "Client node ID mismatch.";
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        if (request.client_name != service_context.get_client_node_id()) {
+            std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                      << service_context.get_client_node_id()
+                      << "', got '" << request.client_name << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            message = "Client node ID mismatch.";
+        }
     }
 
-    auto ret = hako_asset_register_polling(service_context.get_client_node_id().c_str());
-    if (!ret) {
-        std::cerr << "ERROR: Failed to register asset polling for client '"
-                  << service_context.get_client_node_id() << "'." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
-        message = "Failed to register asset polling.";
-    }
-    else {
-        HakoCpp_JoinRequest request_body;
-        ret = service_helper.get_request_body(request, request_body);
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        auto ret = hako_asset_register_polling(service_context.get_client_node_id().c_str());
         if (!ret) {
-            std::cerr << "ERROR: Failed to get join request body." << std::endl;
-            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-            message = "Invalid join request body.";
+            std::cerr << "ERROR: Failed to register asset polling for client '"
+                      << service_context.get_client_node_id() << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
+            message = "Failed to register asset polling.";
+        }
+        else {
+            HakoCpp_JoinRequest request_body;
+            ret = service_helper.get_request_body(request, request_body);
+            if (!ret) {
+                std::cerr << "ERROR: Failed to get join request body." << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+                message = "Invalid join request body.";
+            }
         }
     }
     HakoCpp_JoinResponse response_body;
@@ -83,22 +87,31 @@ void GetSimStateHandler::handle(
               << request.client_name << std::endl;
 
     Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
-    if (request.client_name != service_context.get_client_node_id()) {
-        std::cerr << "WARNING: Client node ID mismatch. Expected '"
-                  << service_context.get_client_node_id()
-                  << "', got '" << request.client_name << "'." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        if (request.client_name != service_context.get_client_node_id()) {
+            std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                      << service_context.get_client_node_id()
+                      << "', got '" << request.client_name << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+        }
     }
-    HakoCpp_GetSimStateRequest request_body;
-    auto ret = service_helper.get_request_body(request, request_body);
-    if (!ret) {
-        std::cerr << "ERROR: Failed to get get_sim_state request body." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        HakoCpp_GetSimStateRequest request_body;
+        auto ret = service_helper.get_request_body(request, request_body);
+        if (!ret) {
+            std::cerr << "ERROR: Failed to get get_sim_state request body." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+        }
     }
 
-    int state = hako_simevent_get_state();
     HakoCpp_GetSimStateResponse response_body;
-    response_body.sim_state = static_cast<Hako_uint32>(state);
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        int state = hako_simevent_get_state();
+        response_body.sim_state = static_cast<Hako_uint32>(state);
+    }
+    else {
+        response_body.sim_state = -1;
+    }
     service_helper.reply(
         *service_rpc,
         request,
@@ -118,36 +131,45 @@ void SimControlHandler::handle(
               << request.client_name << std::endl;
     
     Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
-    if (request.client_name != service_context.get_client_node_id()) {
-        std::cerr << "WARNING: Client node ID mismatch. Expected '"
-                  << service_context.get_client_node_id()
-                  << "', got '" << request.client_name << "'." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-        message = "Client node ID mismatch.";
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        if (request.client_name != service_context.get_client_node_id()) {
+            std::cerr << "WARNING: Client node ID mismatch. Expected '"
+                      << service_context.get_client_node_id()
+                      << "', got '" << request.client_name << "'." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            message = "Client node ID mismatch.";
+        }
     }
 
-    HakoCpp_SimControlRequest request_body;
-    auto ret = service_helper.get_request_body(request, request_body);
-    if (!ret) {
-        std::cerr << "ERROR: Failed to get SimControl request body." << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-        message = "Invalid SimControl request body.";
-    }
-    if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Start)) {
-        ret = hako_simevent_start();
-    } else if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Stop)) {
-        ret = hako_simevent_stop();
-    } else if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Reset)) {
-        ret = hako_simevent_reset();
-    } else {
-        std::cerr << "ERROR: Invalid SimControl operation: " << request_body.op << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
-        message = "Invalid SimControl operation.";
-    }
-    if (!ret) {
-        std::cerr << "ERROR: Failed to execute SimControl operation: " << request_body.op << std::endl;
-        result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
-        message = "Failed to execute SimControl operation.";
+    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+        HakoCpp_SimControlRequest request_body;
+        auto ret = service_helper.get_request_body(request, request_body);
+        if (!ret) {
+            std::cerr << "ERROR: Failed to get SimControl request body." << std::endl;
+            result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+            message = "Invalid SimControl request body.";
+        }
+        else {
+            if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Start)) {
+                ret = hako_simevent_start();
+            } else if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Stop)) {
+                ret = hako_simevent_stop();
+            } else if (request_body.op == static_cast<Hako_int32>(HakoSimulationControlCommand::HakoSimControl_Reset)) {
+                ret = hako_simevent_reset();
+            } else {
+                std::cerr << "ERROR: Invalid SimControl operation: " << request_body.op << std::endl;
+                result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+                message = "Invalid SimControl operation.";
+                ret = false;
+            }
+            if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
+                if (!ret) {
+                    std::cerr << "ERROR: Failed to execute SimControl operation: " << request_body.op << std::endl;
+                    result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
+                    message = "Failed to execute SimControl operation.";
+                }
+            }
+        }
     }
     HakoCpp_SimControlResponse response_body;
     response_body.status_code = result_code;

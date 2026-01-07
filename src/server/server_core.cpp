@@ -94,6 +94,8 @@ bool ServerCore::initialize() {
 
         // service handlers registration
         handlers_["HakoRemoteApi/Join"] = std::make_unique<JoinHandler>();
+        handlers_["HakoRemoteApi/GetSimState"] = std::make_unique<GetSimStateHandler>();
+        handlers_["HakoRemoteApi/SimControl"] = std::make_unique<SimControlHandler>();
 
     } catch (const nlohmann::json::parse_error& e) {
         set_last_error("Failed to parse configuration file: " + std::string(e.what()));

@@ -136,6 +136,29 @@ bool ClientCore::stop() {
     std::cout << "Hakoniwa Remote API Client stopped." << std::endl;
     return true;
 }
+bool ClientCore::wait_response_for(const std::string& expected_service, hakoniwa::pdu::rpc::RpcResponse& out_resp) {
+    std::string service_name_ret;
+    hakoniwa::pdu::rpc::ClientEventType event = hakoniwa::pdu::rpc::ClientEventType::NONE;
+    while (event == hakoniwa::pdu::rpc::ClientEventType::NONE || service_name_ret != expected_service) {
+        event = rpc_client_->poll(service_name_ret, out_resp);
+        if (event == hakoniwa::pdu::rpc::ClientEventType::RESPONSE_TIMEOUT) {
+            set_last_error("Join service call timed out.");
+            return false;
+        } else if (event == hakoniwa::pdu::rpc::ClientEventType::RESPONSE_IN) {
+            if (service_name_ret == expected_service) {
+                std::cout << "Received response for " << expected_service << " service." << std::endl;
+                break; // Got the response for expected service
+                return true;
+            }
+            else {
+                std::cerr << "Received response for unknown service: " << service_name_ret << std::endl;
+                return false;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::microseconds(100)); // Sleep briefly
+    }
+    return true;
+}
 
 bool ClientCore::join() {
   if (!is_initialized_) {
@@ -153,27 +176,10 @@ bool ClientCore::join() {
     return false;
   }
 
-  hakoniwa::pdu::rpc::RpcResponse rpc_response;
-  std::string service_name_ret;
-  hakoniwa::pdu::rpc::ClientEventType event = hakoniwa::pdu::rpc::ClientEventType::NONE;
-
   // Poll for response
-  auto start_time = std::chrono::high_resolution_clock::now();
-  while (event == hakoniwa::pdu::rpc::ClientEventType::NONE || service_name_ret != service_name) {
-      event = rpc_client_->poll(service_name_ret, rpc_response);
-      if (event == hakoniwa::pdu::rpc::ClientEventType::RESPONSE_TIMEOUT) {
-          set_last_error("Join service call timed out.");
-          return false;
-      } else if (event == hakoniwa::pdu::rpc::ClientEventType::RESPONSE_IN) {
-        if (service_name_ret == service_name) {
-            std::cout << "Received response for Join service." << std::endl;
-            break; // Got the response for Join service
-        }
-        else {
-            std::cerr << "Received response for unknown service: " << service_name_ret << std::endl;
-        }
-      }
-      std::this_thread::sleep_for(std::chrono::microseconds(100)); // Sleep briefly
+  hakoniwa::pdu::rpc::RpcResponse rpc_response;
+  if (!wait_response_for(service_name, rpc_response)) {
+      return false; // Error already set in wait_response_for
   }
 
   if (!service_helper.get_response_body(rpc_response, response_body)) {

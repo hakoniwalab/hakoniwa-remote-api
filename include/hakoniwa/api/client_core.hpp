@@ -3,6 +3,7 @@
 #include "hakoniwa/api/protocol.hpp"
 #include <memory>
 #include <string>
+#include "hakoniwa/pdu/rpc/rpc_service_helper.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_client.hpp" // Directly include for full definition
 
 namespace hakoniwa::api {
@@ -69,16 +70,16 @@ public:
   std::string last_error() const;
 
 private:
-  void set_last_error(const std::string &msg);
+    void set_last_error(const std::string &msg);
+    bool wait_response_for(const std::string& expected_service, hakoniwa::pdu::rpc::RpcResponse& out_resp);
+    std::string client_name_;
+    std::string config_path_;
+    std::string server_node_id_;
+    std::string rpc_config_path_;
+    mutable std::string last_error_;
 
-  std::string client_name_;
-  std::string config_path_;
-  std::string server_node_id_;
-  std::string rpc_config_path_;
-  mutable std::string last_error_;
-
-  std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesClient> rpc_client_; // Corrected class name
-  bool is_initialized_ = false;
+    std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesClient> rpc_client_; // Corrected class name
+    bool is_initialized_ = false;
 };
 
 } // namespace hakoniwa::api

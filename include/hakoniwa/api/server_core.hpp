@@ -31,6 +31,7 @@ public:
 private:
     void serve();
     void handle();
+    void conductor_loop();
     void set_last_error(std::string msg);
 
 private:
@@ -51,6 +52,7 @@ private:
     std::unique_ptr<hakoniwa::time_source::ITimeSource> time_source_;
     std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
     std::thread serve_thread_;
+    std::thread conductor_thread_;
 
     std::thread service_handle_thread_;
     std::mutex handler_mutex_;

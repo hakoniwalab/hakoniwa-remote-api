@@ -153,6 +153,9 @@ bool ServerCore::start() {
 
     stop_requested_ = false;
     is_running_ = true;
+    if (enable_conductor_) {
+        conductor_thread_ = std::thread(&ServerCore::conductor_loop, this);
+    }
     serve_thread_ = std::thread(&ServerCore::serve, this);
     service_handle_thread_ = std::thread(&ServerCore::handle, this);
 
@@ -180,10 +183,27 @@ bool ServerCore::stop() {
     if (rpc_server_) {
         rpc_server_->stop_all_services();
     }
+    if (enable_conductor_ && conductor_thread_.joinable()) {
+        conductor_thread_.join();
+    }
     
     is_running_ = false;
     std::cout << "Hakoniwa Remote API Server stopped." << std::endl;
     return true;
+}
+
+void ServerCore::conductor_loop() {
+    while (!stop_requested_) {
+        bool simulation_progressed = hako_master_execute();
+        if (!simulation_progressed) {
+            // If no progress, sleep for delta time
+            std::this_thread::sleep_for(std::chrono::microseconds(delta_time_usec_));
+        }
+        else  {
+            // Yield to allow other threads to run
+            std::this_thread::yield();
+        }
+    }
 }
 
 void ServerCore::serve() {

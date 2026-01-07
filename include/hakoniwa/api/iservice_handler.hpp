@@ -9,7 +9,7 @@ namespace hakoniwa::api {
 class IServiceHandler {
 public:
     virtual ~IServiceHandler() = default;
-    virtual void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  const hakoniwa::pdu::rpc::RpcRequest& request) = 0;
+    virtual void handle(ServerContext& service_context, std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> service_rpc,  hakoniwa::pdu::rpc::RpcRequest& request) = 0;
     virtual void cancel() {
         is_canceled_ = true;
     }

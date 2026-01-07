@@ -17,6 +17,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
     include
     /usr/local/hakoniwa/include
+    messages/impl/types
 )
 
 # Link against the submodule library

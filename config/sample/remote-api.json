@@ -1,9 +1,14 @@
 {
     "version": 1,
     "rpc_service_config_path": "rpc/rpc.json",
-    "server": {
-        "nodeId": "node0" 
-    },
+    "servers": [
+        {
+            "nodeId": "node0-1" 
+        },
+        {
+            "nodeId": "node0-2" 
+        }
+    ],
     "time_source_type": "real",
     "delta_time_usec": 1000,
     "max_delay_time_usec": 20000,
@@ -11,14 +16,14 @@
         {
             "name": "client-01",
             "nodeId": "node1",
-            "server_nodeId": "node0",
+            "server_nodeId": "node0-1",
             "role": "conductor",
             "delta_time_usec": 10000
         },
         {
             "name": "client-02",
             "nodeId": "node2",
-            "server_nodeId": "node0",
+            "server_nodeId": "node0-2",
             "role": "conductor",
             "delta_time_usec": 20000
         }

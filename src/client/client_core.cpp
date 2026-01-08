@@ -78,11 +78,9 @@ bool ClientCore::initialize() {
         return false;
     }
 
-    if (!config.contains("server") || !config["server"].is_object() ||
-        !config["server"].contains("nodeId") ||
-        !config["server"]["nodeId"].is_string()) {
+    if (!config.contains("servers") || !config["servers"].is_array()) {
       set_last_error(
-          "Config error: 'server.nodeId' not found or not a string.");
+          "Config error: 'servers' array not found or not an array.");
       return false;
     }
 

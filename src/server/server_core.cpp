@@ -10,11 +10,10 @@
 
 namespace hakoniwa::api {
 
-ServerCore::ServerCore(std::string config_path, std::string client_node_id, bool enable_conductor)
-    : config_path_(std::move(config_path)), enable_conductor_(enable_conductor) {
+ServerCore::ServerCore(std::string config_path, std::string node_id, bool enable_conductor)
+    : config_path_(std::move(config_path)), node_id_(std::move(node_id)), enable_conductor_(enable_conductor) {
     // Constructor initializes the config path.
     // The rest of the initialization happens in start().
-    server_context_.set_client_node_id(std::move(client_node_id));
 }
 
 ServerCore::~ServerCore() {
@@ -46,16 +45,34 @@ bool ServerCore::initialize() {
         ifs >> config_;
 
         // Check for "server" and "server.nodeId"
-        if (!config_.contains("server") || !config_["server"].is_object()) {
-            set_last_error("Config error: 'server' object not found or not an object.");
+        if (!config_.contains("servers") || !config_["servers"].is_array()) {
+            set_last_error("Config error: 'servers' array not found or not an array.");
             return false;
         }
-        if (!config_["server"].contains("nodeId") || !config_["server"]["nodeId"].is_string()) {
-            set_last_error("Config error: 'server.nodeId' not found or not a string.");
+        bool node_id_found = false;
+        for (const auto& server : config_["servers"]) {
+            if (server["nodeId"] == node_id_) {
+                node_id_found = true;
+                break;
+            }
+        }
+        if (!node_id_found) {
+            set_last_error("Config error: 'servers' does not match the provided node ID.");
             return false;
         }
-        node_id_ = config_["server"]["nodeId"];
-
+        bool client_found = false;
+        for (const auto& client : config_["participants"]) {
+            if (client["server_nodeId"] == node_id_) {
+                client_found = true;
+                server_context_.set_client_node_id(client["nodeId"]);
+                break;
+            }
+        }
+        if (!client_found) {
+            set_last_error("Config error: No participant found for server node ID '" + node_id_ + "'.");
+            return false;
+        }
+    
         // Check for "delta_time_usec"
         if (!config_.contains("delta_time_usec") || !config_["delta_time_usec"].is_number_unsigned()) {
             set_last_error("Config error: 'delta_time_usec' not found or not an unsigned number.");

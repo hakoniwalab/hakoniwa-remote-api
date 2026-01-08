@@ -3,7 +3,7 @@
   "pdu_config_path": "../pdudef/pdudef.json",
   "endpoints": [
     {
-      "nodeId": "node0",
+      "nodeId": "node0-1",
       "endpoints": [
         {
           "id": "server_ep_id",
@@ -47,7 +47,7 @@
       },
       "server_endpoints": [
         {
-        "nodeId": "node0",
+        "nodeId": "node0-1",
         "endpointId": "server_ep_id"
        }
       ],
@@ -79,7 +79,7 @@
       },
       "server_endpoints": [
         {
-          "nodeId": "node0",
+          "nodeId": "node0-1",
           "endpointId": "server_ep_id"
         }
       ],
@@ -111,7 +111,7 @@
       },
       "server_endpoints": [
         {
-          "nodeId": "node0",
+          "nodeId": "node0-1",
           "endpointId": "server_ep_id"
         }
       ],
@@ -143,7 +143,7 @@
       },
       "server_endpoints": [
         {
-          "nodeId": "node0",
+          "nodeId": "node0-1",
           "endpointId": "server_ep_id"
         }
       ],
@@ -175,7 +175,7 @@
       },
       "server_endpoints": [
         {
-        "nodeId": "node0",
+        "nodeId": "node0-1",
         "endpointId": "server_ep_id"
         }
       ],

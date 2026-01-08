@@ -28,6 +28,7 @@ public:
   bool initialize();
 
   bool start();
+  bool is_pdu_end_point_running();
   bool stop();
 
   /**

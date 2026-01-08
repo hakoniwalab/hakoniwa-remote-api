@@ -140,6 +140,9 @@ bool ClientCore::start() {
     std::cout << "Hakoniwa Remote API Client started." << std::endl;
     return true;
 }
+bool ClientCore::is_pdu_end_point_running() {
+    return rpc_client_->is_pdu_end_point_running();
+}
 bool ClientCore::stop() {
     if (!is_initialized_) {
         set_last_error("Client is not initialized.");

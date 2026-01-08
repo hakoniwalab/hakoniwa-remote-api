@@ -48,6 +48,14 @@ int main(int argc, const char* argv[]) {
                           << ", is_pdu_sync_mode=" << state.is_pdu_sync_mode << std::endl;
             }
         }
+        else if (input == "g:event") {
+            hakoniwa::api::HakoSimulationAssetEvent event;
+            if (!client.get_event(event)) {
+                std::cerr << "GetEvent failed: " << client.last_error() << std::endl;
+            } else {
+                std::cout << "Received event: " << static_cast<int>(event) << std::endl;
+            }
+        }
         else if (input == "q" || input == "quit" || input == "exit") {
             std::cout << "Exiting..." << std::endl;
             break;

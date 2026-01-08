@@ -186,7 +186,7 @@ bool ClientCore::join() {
   HakoCpp_JoinRequest request_body;
   HakoCpp_JoinResponse response_body;
 
-  request_body.name = client_name_;
+  request_body.name = node_id_;
   if (!service_helper.call(*rpc_client_, service_name, request_body, 0)) {
     set_last_error("Failed to call Join service (RPC call failed).");
     return false;
@@ -220,6 +220,7 @@ bool ClientCore::get_sim_state(HakoSimulationStateInfo &state) {
     HakoCpp_GetSimStateRequest request_body;
     HakoCpp_GetSimStateResponse response_body;
 
+    request_body.name = node_id_;
     if (!service_helper.call(*rpc_client_, service_name, request_body, 0)) {
         set_last_error("Failed to call GetSimState service (RPC call failed).");
         return false;
@@ -253,6 +254,7 @@ bool ClientCore::sim_control(HakoSimulationControlCommand command) {
     const std::string service_name = "HakoRemoteApi/SimControl";
     HakoRpcServiceServerTemplateType(SimControl) service_helper;
     HakoCpp_SimControlRequest request_body;
+    request_body.name = node_id_;
     request_body.op = static_cast<Hako_int32>(command);
     HakoCpp_SimControlResponse response_body;
 
@@ -289,6 +291,7 @@ bool ClientCore::get_event(HakoSimulationAssetEvent &event_code) {
     HakoCpp_GetEventRequest request_body;
     HakoCpp_GetEventResponse response_body;
 
+    request_body.name = node_id_;
     if (!service_helper.call(*rpc_client_, service_name, request_body, 0)) {
         set_last_error("Failed to call GetEvent service (RPC call failed).");
         return false;
@@ -317,6 +320,7 @@ bool ClientCore::ack_event(HakoSimulationAssetEvent event_code) {
     const std::string service_name = "HakoRemoteApi/AckEvent";
     HakoRpcServiceServerTemplateType(AckEvent) service_helper;
     HakoCpp_AckEventRequest request_body;
+    request_body.name = node_id_;
     request_body.event_code = static_cast<Hako_uint32>(event_code);
     request_body.result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK; // Assuming success for now
     HakoCpp_AckEventResponse response_body;

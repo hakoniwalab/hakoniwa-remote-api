@@ -182,12 +182,19 @@ void GetEventHandler::handle(
             << std::endl;
 
   Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
-
-  validate_client_id(service_context, request.client_name, result_code);
-
+  HakoCpp_GetEventRequest request_body;
   HakoCpp_GetEventResponse response_body;
+
+  if (!validate_client_id(service_context, request.client_name, result_code)) {
+    std::cerr << "ERROR: Client ID validation failed." << std::endl;
+    result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+  } else if (!service_helper.get_request_body(request, request_body)) {
+    std::cerr << "ERROR: Failed to get GetEvent request body." << std::endl;
+    result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
+  }
+  
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-    int event_code = hako_asset_get_event(request.client_name.c_str());
+    int event_code = hako_asset_get_event(request_body.name.c_str());
     if (static_cast<HakoSimulationAssetEvent>(event_code) ==
         HakoSimulationAssetEvent::HakoSimAssetEvent_Error) {
       std::cerr << "ERROR: hako_asset_get_event() failed for client '"
@@ -232,7 +239,7 @@ void AckEventHandler::handle(
         static_cast<HakoSimulationAssetEvent>(request_body.event_code);
     switch (event_code) {
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Start:
-      ret = hako_asset_start_feedback(request.client_name.c_str(), true);
+      ret = hako_asset_start_feedback(request_body.name.c_str(), true);
       if (ret) {
         /*
         * STARTフィードバックが帰ってきた時点で、クライアント側はPDU転送は完了しているとみなす。
@@ -248,14 +255,14 @@ void AckEventHandler::handle(
         * 
         * TODO事項： 将来的に上記のPDU書き込み完了待ちを実装する。
         */
-        (void)hako_asset_notify_write_pdu_done(request.client_name.c_str());
+        (void)hako_asset_notify_write_pdu_done(request_body.name.c_str());
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:
-      ret = hako_asset_stop_feedback(request.client_name.c_str(), true);
+      ret = hako_asset_stop_feedback(request_body.name.c_str(), true);
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Reset:
-      ret = hako_asset_reset_feedback(request.client_name.c_str(), true);
+      ret = hako_asset_reset_feedback(request_body.name.c_str(), true);
       break;
     default:
       std::cerr << "ERROR: AckEvent request contains unknown event code: "

@@ -36,6 +36,18 @@ int main(int argc, const char* argv[]) {
                 std::cout << "Joined the simulation successfully." << std::endl;
             }
         }
+        else if (input == "state") {
+            hakoniwa::api::HakoSimulationStateInfo state;
+            if (!client.get_sim_state(state)) {
+                std::cerr << "GetSimState failed: " << client.last_error() << std::endl;
+            } else {
+                std::cout << "Simulation State: time=" << state.master_time
+                          << " usec, status=" << static_cast<int>(state.sim_state) << std::endl;
+                std::cout << "  is_pdu_created=" << state.is_pdu_created
+                          << ", is_simulation_mode=" << state.is_simulation_mode
+                          << ", is_pdu_sync_mode=" << state.is_pdu_sync_mode << std::endl;
+            }
+        }
         else if (input == "q" || input == "quit" || input == "exit") {
             std::cout << "Exiting..." << std::endl;
             break;

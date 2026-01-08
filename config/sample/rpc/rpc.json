@@ -47,9 +47,9 @@
       },
       "server_endpoints": [
         {
-        "nodeId": "node0-1",
-        "endpointId": "server_ep_id"
-       }
+          "nodeId": "node0-1",
+          "endpointId": "server_ep_id"
+        }
       ],
       "clients": [
         {
@@ -134,7 +134,7 @@
       "pduSize": {
         "server": {
           "heapSize": 0,
-          "baseSize": 400
+          "baseSize": 408
         },
         "client": {
           "heapSize": 0,
@@ -170,13 +170,13 @@
         },
         "client": {
           "heapSize": 0,
-          "baseSize": 272
+          "baseSize": 304
         }
       },
       "server_endpoints": [
         {
-        "nodeId": "node0-1",
-        "endpointId": "server_ep_id"
+          "nodeId": "node0-1",
+          "endpointId": "server_ep_id"
         }
       ],
       "clients": [

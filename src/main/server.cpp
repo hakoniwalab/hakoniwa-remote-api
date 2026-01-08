@@ -18,7 +18,9 @@ int main(int argc, const char* argv[]) {
     }
 
     // Run the server for some time (e.g., 10 seconds)
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    while (server.is_running()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
     if (!server.stop()) {
         std::cerr << "Server stop failed: " << server.last_error() << std::endl;

@@ -65,6 +65,7 @@ bool ServerCore::initialize() {
             if (client["server_nodeId"] == node_id_) {
                 client_found = true;
                 server_context_.set_client_node_id(client["nodeId"]);
+                server_context_.set_client_name(client["name"]);
                 break;
             }
         }

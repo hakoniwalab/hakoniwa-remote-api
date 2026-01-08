@@ -32,11 +32,18 @@ public:
     void set_client_node_id(const std::string& node_id) {
         client_node_id_ = node_id;
     }
+    const std::string& get_client_name() const {
+        return client_name_;
+    }
+    void set_client_name(const std::string& client_name) {
+        client_name_ = client_name;
+    }
 private:
     std::mutex mtx_;
     ServerServiceContextStatus status_{ServerServiceContextStatus::SERVER_SERVICE_NOT_READY};
     nlohmann::json config_;
     std::string client_node_id_;
+    std::string client_name_;
 };
 
 } // namespace hakoniwa::api

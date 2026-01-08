@@ -111,7 +111,7 @@ bool ClientCore::initialize() {
   // 2. Initialize RPC Client
   try {
     rpc_client_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesClient>(
-        node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", delta_time_usec_, "hakoniwa");
+        node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", delta_time_usec_, "real");
     if (!rpc_client_->initialize_services()) {
       set_last_error("Failed to initialize RPC client.");
       rpc_client_.reset();

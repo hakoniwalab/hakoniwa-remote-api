@@ -19,9 +19,9 @@ namespace hakoniwa::api {
 static bool validate_client_id(ServerContext &service_context,
                                const std::string &client_name,
                                Hako_int32 &result_code) {
-  if (client_name != service_context.get_client_node_id()) {
-    std::cerr << "WARNING: Client node ID mismatch. Expected '"
-              << service_context.get_client_node_id() << "', got '"
+  if (client_name != service_context.get_client_name()) {
+    std::cerr << "WARNING: Client Name mismatch. Expected '"
+              << service_context.get_client_name() << "', got '"
               << client_name << "'." << std::endl;
     result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
     return false;

@@ -13,12 +13,22 @@ class RpcLinter(LinterBase):
     def __init__(self, file_path: str):
         super().__init__(file_path)
         self.endpoint_idx: Dict[str, Set[str]] = {}
+        self.endpoints: List[Dict] = []
 
     def _run_checks(self):
+        self.endpoints = self._load_endpoints()
         self.endpoint_idx = self._build_endpoint_index()
+        self._check_pdu_metadata_size()
         self._check_pdu_config_path()
         self._check_endpoint_config_paths()
         self._check_services()
+
+    def _check_pdu_metadata_size(self):
+        metadata_size = self.data.get("pduMetaDataSize")
+        if not self._require_type(metadata_size, int, "rpc.pduMetaDataSize"):
+            return
+        if metadata_size != 24:
+            self.errors.append(LintError("rpc.pduMetaDataSize: must be 24"))
 
     def _check_pdu_config_path(self):
         pdu_path = self.data.get("pdu_config_path")
@@ -32,13 +42,31 @@ class RpcLinter(LinterBase):
              self.errors.append(LintError("rpc.pdu_config_path: missing or empty string"))
 
 
+    def _load_endpoints(self) -> List[Dict]:
+        eps = self.data.get("endpoints")
+        if isinstance(eps, str):
+            resolved = self._resolve_path(eps)
+            if not os.path.exists(resolved):
+                self.errors.append(LintError(
+                    f"rpc.endpoints: not found: '{eps}' (resolved: '{resolved}')"
+                ))
+                return []
+            try:
+                loaded = self._load_json(resolved)
+            except (OSError, ValueError) as e:
+                self.errors.append(LintError(f"rpc.endpoints: failed to read {resolved}: {e}"))
+                return []
+            if not isinstance(loaded, list):
+                self.errors.append(LintError("rpc.endpoints: expected list in endpoints file"))
+                return []
+            return loaded
+        if self._require_type(eps, list, "rpc.endpoints"):
+            return eps
+        return []
+
     def _build_endpoint_index(self) -> Dict[str, Set[str]]:
         idx: Dict[str, Set[str]] = {}
-        eps = self.data.get("endpoints")
-        if not self._require_type(eps, list, "rpc.endpoints"):
-            return idx
-
-        for i, node in enumerate(eps):
+        for i, node in enumerate(self.endpoints):
             if not self._require_type(node, dict, f"rpc.endpoints[{i}]"):
                 continue
             node_id = node.get("nodeId")
@@ -64,10 +92,10 @@ class RpcLinter(LinterBase):
         return idx
 
     def _check_endpoint_config_paths(self):
-        eps = self.data.get("endpoints")
-        if not isinstance(eps, list): return
+        if not isinstance(self.endpoints, list):
+            return
 
-        for i, node in enumerate(eps):
+        for i, node in enumerate(self.endpoints):
             if not isinstance(node, dict): continue
             node_id = node.get("nodeId", f"<endpoints[{i}]>")
             node_eps = node.get("endpoints")
@@ -123,19 +151,32 @@ class RpcLinter(LinterBase):
                 ))
 
     def _check_service_server_endpoint(self, svc: Dict, si: int, sname: str):
-        se = svc.get("server_endpoint")
-        if not self._require_type(se, dict, f"rpc.services[{si}] '{sname}': server_endpoint"):
+        server_endpoints = svc.get("server_endpoints")
+        if server_endpoints is None:
+            server_endpoint = svc.get("server_endpoint")
+            if not self._require_type(server_endpoint, dict, f"rpc.services[{si}] '{sname}': server_endpoint"):
+                return
+            server_endpoints = [server_endpoint]
+
+        if not self._require_type(server_endpoints, list, f"rpc.services[{si}] '{sname}': server_endpoints"):
             return
 
-        snode = se.get("nodeId")
-        seid = se.get("endpointId")
-        if not (self._require_type(snode, str, f"rpc.services[{si}] '{sname}': server_endpoint.nodeId") and snode): return
-        if not (self._require_type(seid, str, f"rpc.services[{si}] '{sname}': server_endpoint.endpointId") and seid): return
+        for ei, se in enumerate(server_endpoints):
+            ctx = f"rpc.services[{si}] '{sname}': server_endpoints[{ei}]"
+            if not self._require_type(se, dict, ctx):
+                continue
 
-        if snode not in self.endpoint_idx:
-            self.errors.append(LintError(f"rpc.services[{si}] '{sname}': server nodeId '{snode}' not found in rpc.endpoints"))
-        elif seid not in self.endpoint_idx[snode]:
-            self.errors.append(LintError(f"rpc.services[{si}] '{sname}': server endpointId '{seid}' not found under node '{snode}'"))
+            snode = se.get("nodeId")
+            seid = se.get("endpointId")
+            if not (self._require_type(snode, str, f"{ctx}.nodeId") and snode):
+                continue
+            if not (self._require_type(seid, str, f"{ctx}.endpointId") and seid):
+                continue
+
+            if snode not in self.endpoint_idx:
+                self.errors.append(LintError(f"{ctx}: server nodeId '{snode}' not found in rpc.endpoints"))
+            elif seid not in self.endpoint_idx[snode]:
+                self.errors.append(LintError(f"{ctx}: server endpointId '{seid}' not found under node '{snode}'"))
 
     def _check_service_clients(self, svc: Dict, si: int, sname: str):
         clients = svc.get("clients")

@@ -57,6 +57,50 @@ int main(int argc, const char* argv[]) {
                 std::cout << "Received event: " << static_cast<int>(event) << std::endl;
             }
         }
+        else if ((input == "c:start") ||
+                 (input == "c:stop") ||
+                 (input == "c:reset")) {
+            std::string command_name = input.substr(2);
+            std::cout << "Sending control command: " << command_name << std::endl;
+            hakoniwa::api::HakoSimulationControlCommand command;
+            if (command_name == "start") {
+                command = hakoniwa::api::HakoSimulationControlCommand::HakoSimControl_Start;
+            } else if (command_name == "stop") {
+                command = hakoniwa::api::HakoSimulationControlCommand::HakoSimControl_Stop;
+            } else if (command_name == "reset") {
+                command = hakoniwa::api::HakoSimulationControlCommand::HakoSimControl_Reset;
+            } else {
+                std::cerr << "Unknown command: " << command_name << std::endl;
+                continue;
+            }
+            if (!client.sim_control(command)) {
+                std::cerr << "SimControl " << command_name << " failed: " << client.last_error() << std::endl;
+            } else {
+                std::cout << command_name << " command sent successfully." << std::endl;
+            }
+        }
+        else if ((input == "a:start") ||
+                 (input == "a:stop") ||
+                 (input == "a:reset")) {
+            std::string event_name = input.substr(2);
+            std::cout << "Acknowledging event: " << event_name << std::endl;
+            hakoniwa::api::HakoSimulationAssetEvent event;
+            if (event_name == "start") {
+                event = hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Start;
+            } else if (event_name == "stop") {
+                event = hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Stop;
+            } else if (event_name == "reset") {
+                event = hakoniwa::api::HakoSimulationAssetEvent::HakoSimAssetEvent_Reset;
+            } else {
+                std::cerr << "Unknown event: " << event_name << std::endl;
+                continue;
+            }
+            if (!client.ack_event(event)) {
+                std::cerr << "AckEvent " << event_name << " failed: " << client.last_error() << std::endl;
+            } else {
+                std::cout << event_name << " event acknowledged successfully." << std::endl;
+            }
+        }
         else if (input == "q" || input == "quit" || input == "exit") {
             std::cout << "Exiting..." << std::endl;
             break;

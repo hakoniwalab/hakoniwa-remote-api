@@ -30,6 +30,7 @@ int main(int argc, const char* argv[]) {
         std::getline(std::cin, input);
         // Join the simulation
         if (input == "join") {
+            std::cout << "Joining the simulation..." << std::endl;
             if (!client.join()) {
                 std::cerr << "Join failed: " << client.last_error() << std::endl;
             } else {

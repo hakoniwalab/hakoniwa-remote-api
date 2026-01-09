@@ -1,5 +1,6 @@
 {
     "version": 1,
+    "endpoints_config_path": "rpc/endpoints.json",
     "rpc_service_config_path": "rpc/rpc.json",
     "servers": [
         {

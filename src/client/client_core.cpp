@@ -31,11 +31,12 @@ ClientCore::~ClientCore() {
   // automatically.
 }
 
-bool ClientCore::initialize() {
+bool ClientCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container) {
   if (is_initialized_) {
     set_last_error("Client is already initialized.");
     return false;
   }
+  endpoint_container_ = endpoint_container;
 
   // 1. Parse remote-api.json config and extract values
   try {
@@ -112,7 +113,7 @@ bool ClientCore::initialize() {
   try {
     rpc_client_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesClient>(
         node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", delta_time_usec_, "real");
-    if (!rpc_client_->initialize_services()) {
+    if (!rpc_client_->initialize_services(endpoint_container_)) {
       set_last_error("Failed to initialize RPC client.");
       rpc_client_.reset();
       return false;
@@ -141,7 +142,7 @@ bool ClientCore::start() {
     return true;
 }
 bool ClientCore::is_pdu_end_point_running() {
-    return rpc_client_->is_pdu_end_point_running();
+    return endpoint_container_ && endpoint_container_->is_running_all();
 }
 bool ClientCore::stop() {
     if (!is_initialized_) {

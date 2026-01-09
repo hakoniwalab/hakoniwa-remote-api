@@ -1,35 +1,7 @@
 {
   "pduMetaDataSize": 24,
   "pdu_config_path": "../pdudef/pdudef.json",
-  "endpoints": [
-    {
-      "nodeId": "node0-1",
-      "endpoints": [
-        {
-          "id": "server_ep_id",
-          "config_path": "../endpoint/server_endpoint.json"
-        }
-      ]
-    },
-    {
-      "nodeId": "node1",
-      "endpoints": [
-        {
-          "id": "client1_ep_id",
-          "config_path": "../endpoint/client1_endpoint.json"
-        }
-      ]
-    },
-    {
-      "nodeId": "node2",
-      "endpoints": [
-        {
-          "id": "client2_ep_id",
-          "config_path": "../endpoint/client2_endpoint.json"
-        }
-      ]
-    }
-  ],
+  "endpoints_config_path": "endpoints.json",
   "services": [
     {
       "name": "HakoRemoteApi/Join",

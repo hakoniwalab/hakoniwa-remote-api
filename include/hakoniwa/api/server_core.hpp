@@ -21,7 +21,7 @@ public:
     ServerCore(std::string config_path, std::string node_id, bool enable_conductor = false);
     ~ServerCore(); // stop() して join する前提
 
-    bool initialize(); // if needed in future
+    bool initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container); // if needed in future
     bool start();  // non-blocking
     bool stop();   // idempotent
 
@@ -50,6 +50,7 @@ private:
     std::mutex start_mutex_;
     mutable std::mutex err_mutex_;
     std::unique_ptr<hakoniwa::time_source::ITimeSource> time_source_;
+    std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container_;
     std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesServer> rpc_server_;
     std::thread serve_thread_;
     std::thread conductor_thread_;

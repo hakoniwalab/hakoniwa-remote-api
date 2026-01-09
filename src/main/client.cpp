@@ -1,21 +1,37 @@
 #include "hakoniwa/api/client_core.hpp"
 
 int main(int argc, const char* argv[]) {
-    if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_remote_api.json> <nodeId>" << std::endl;
+    if (argc < 4) {
+        std::cerr << "Usage: " << argv[0] << " <path_to_remote_api.json> <nodeId> <path_to_endpoints.json>" << std::endl;
         return 1;
     }
     std::string config_path = argv[1];
     std::string node_id = argv[2];
+    std::string endpoints_config_path = argv[3];
+    std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container =
+        std::make_shared<hakoniwa::pdu::EndpointContainer>(node_id, endpoints_config_path);
     // Example usage of ClientCore
     hakoniwa::api::ClientCore client(node_id, config_path);
-    if (!client.initialize()) {
+
+    if (endpoint_container->initialize() != HakoPduErrorType::HAKO_PDU_ERR_OK) {
+        std::cerr << "Failed to initialize EndpointContainer: " << endpoint_container->last_error() << std::endl;
+        return 1;
+    }
+
+    if (!client.initialize(endpoint_container)) {
         std::cerr << "Client initialization failed: " << client.last_error() << std::endl;
+        return 1;
+    }
+    if (endpoint_container->start_all() != HakoPduErrorType::HAKO_PDU_ERR_OK) {
+        std::cerr << "Failed to start all endpoints: " << endpoint_container->last_error() << std::endl;
         return 1;
     }
     if (!client.start()) {
         std::cerr << "Client start failed: " << client.last_error() << std::endl;
         return 1;
+    }
+    while (!endpoint_container->is_running_all()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     while (!client.is_pdu_end_point_running()) {
         std::cout << "Waiting for PDU endpoint to be running..." << std::endl;
@@ -105,12 +121,26 @@ int main(int argc, const char* argv[]) {
             std::cout << "Exiting..." << std::endl;
             break;
         }
+        else {
+            std::cout << "Unknown command. Available commands:" << std::endl;
+            std::cout << "  join          - Join the simulation" << std::endl;
+            std::cout << "  state         - Get simulation state" << std::endl;
+            std::cout << "  g:event       - Get next event" << std::endl;
+            std::cout << "  c:start       - Send Start control command" << std::endl;
+            std::cout << "  c:stop        - Send Stop control command" << std::endl;
+            std::cout << "  c:reset       - Send Reset control command" << std::endl;
+            std::cout << "  a:start       - Acknowledge Start event" << std::endl;
+            std::cout << "  a:stop        - Acknowledge Stop event" << std::endl;
+            std::cout << "  a:reset       - Acknowledge Reset event" << std::endl;
+            std::cout << "  q, quit, exit - Exit the program" << std::endl;
+        }
     }
     
     if (!client.stop()) {
         std::cerr << "Client stop failed: " << client.last_error() << std::endl;
         return 1;
     }
+    endpoint_container->stop_all();
 
     return 0;
 }

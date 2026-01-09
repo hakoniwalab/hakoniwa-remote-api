@@ -25,7 +25,7 @@ public:
    * Parses the configuration and sets up the RPC client.
    * @return true if initialization is successful, false otherwise.
    */
-  bool initialize();
+  bool initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container);
 
   bool start();
   bool is_pdu_end_point_running();
@@ -83,6 +83,7 @@ private:
     mutable std::string last_error_;
 
     std::shared_ptr<hakoniwa::pdu::rpc::RpcServicesClient> rpc_client_; // Corrected class name
+    std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container_;
     bool is_initialized_ = false;
 };
 

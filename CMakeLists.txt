@@ -4,6 +4,22 @@ project(hakoniwa_remote_api CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(APPLE)
+  set(HAKONIWA_LIB_DIRS /usr/local/hakoniwa/lib)
+else()
+  set(HAKONIWA_LIB_DIRS /usr/local/hakoniwa/lib /usr/lib/x86_64-linux-gnu)
+endif()
+
+set(HAKONIWA_LINK_LIBS "")
+foreach(lib_name shakoc hako assets conductor)
+  find_library(HAKONIWA_${lib_name}_LIB NAMES ${lib_name} PATHS ${HAKONIWA_LIB_DIRS})
+  if(HAKONIWA_${lib_name}_LIB)
+    list(APPEND HAKONIWA_LINK_LIBS ${HAKONIWA_${lib_name}_LIB})
+  else()
+    list(APPEND HAKONIWA_LINK_LIBS ${lib_name})
+  endif()
+endforeach()
+
 # Add submodule
 # The second argument specifies the build directory for the submodule, preventing clutter in its source tree
 add_subdirectory(hakoniwa-pdu-rpc build/hakoniwa-pdu-rpc)
@@ -30,6 +46,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     hakoniwa_pdu_rpc
+    ${HAKONIWA_LINK_LIBS}
 )
 
 
@@ -61,11 +78,10 @@ target_link_libraries(server
     ${PROJECT_NAME}
     nlohmann_json::nlohmann_json
     hakoniwa_pdu_rpc
-    shakoc
 )
 target_link_directories(server
   PRIVATE
-    /usr/local/hakoniwa/lib
+    ${HAKONIWA_LIB_DIRS}
 )
 
 add_executable(client 
@@ -82,9 +98,8 @@ target_link_libraries(client
     ${PROJECT_NAME}
     nlohmann_json::nlohmann_json
     hakoniwa_pdu_rpc
-    shakoc
 )
 target_link_directories(client
   PRIVATE
-    /usr/local/hakoniwa/lib
+    ${HAKONIWA_LIB_DIRS}
 )

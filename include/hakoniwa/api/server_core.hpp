@@ -5,6 +5,7 @@
 #include <string_view>
 #include <memory>
 #include <thread>
+#include <condition_variable>
 #include <mutex>
 #include <nlohmann/json.hpp>
 

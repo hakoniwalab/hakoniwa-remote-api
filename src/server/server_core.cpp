@@ -1,7 +1,7 @@
 #include "hakoniwa/api/server_core.hpp"
 #include "hakoniwa/pdu/rpc/rpc_services_server.hpp"
 #include "concrete_service_handler.hpp"
-#include "hakoniwa/hako_capi.h"
+#include "hakoniwa/hakoniwa_asset_polling.h"
 #include <fstream>
 #include <iostream>
 #include <chrono>
@@ -96,14 +96,14 @@ bool ServerCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
         }
         if (enable_conductor_) {
             std::cout << "Conductor mode enabled." << std::endl;
-            if (hako_master_init() == false) {
+            if (hakoniwa_master_init() != 0) {
                 set_last_error("Failed to initialize Hako master.");
                 return false;
             }
-            hako_master_set_config_simtime(max_delay_time_usec_, delta_time_usec_);
+            hakoniwa_master_set_config_simtime(max_delay_time_usec_, delta_time_usec_);
         }
-        bool ret = hako_asset_init();
-        if (!ret) {
+        int ret = hakoniwa_asset_init();
+        if (ret != 0) {
             set_last_error("Failed to initialize Hako asset.");
             return false;
         }
@@ -216,8 +216,8 @@ bool ServerCore::stop() {
 
 void ServerCore::conductor_loop() {
     while (!stop_requested_) {
-        bool simulation_progressed = hako_master_execute();
-        if (!simulation_progressed) {
+        int simulation_progressed = hakoniwa_master_execute();
+        if (simulation_progressed != 0) {
             // If no progress, sleep for delta time
             std::this_thread::sleep_for(std::chrono::microseconds(delta_time_usec_));
         }

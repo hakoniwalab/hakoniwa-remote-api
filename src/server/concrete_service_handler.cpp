@@ -1,5 +1,5 @@
 #include "concrete_service_handler.hpp"
-#include "hakoniwa/hako_capi.h"
+#include "hakoniwa/hakoniwa_asset_polling.h"
 #include "hakoniwa/pdu/rpc/rpc_service_helper.hpp"
 
 #include "hako_srv_msgs/pdu_cpptype_conv_AckEventRequestPacket.hpp"
@@ -64,8 +64,8 @@ void JoinHandler::handle(ServerContext &service_context,
 
   // Register asset
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-    if (!hako_asset_register_polling(
-            service_context.get_client_node_id().c_str())) {
+    if (hakoniwa_asset_register_polling(
+            service_context.get_client_node_id().c_str()) != 0) {
       std::cerr << "ERROR: Failed to register asset polling for client '"
                 << service_context.get_client_node_id() << "'." << std::endl;
       result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
@@ -105,11 +105,11 @@ void GetSimStateHandler::handle(
   HakoCpp_GetSimStateResponse response_body;
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
     response_body.sim_state =
-        static_cast<Hako_uint32>(hako_simevent_get_state());
-    response_body.master_time = static_cast<int64_t>(hako_asset_get_worldtime());
-    response_body.is_pdu_created = hako_asset_is_pdu_created();
-    response_body.is_simulation_mode = hako_asset_is_simulation_mode();
-    response_body.is_pdu_sync_mode = hako_asset_is_pdu_sync_mode(request.client_name.c_str());
+        static_cast<Hako_uint32>(hakoniwa_simevent_get_state());
+    response_body.master_time = static_cast<int64_t>(hakoniwa_asset_get_worldtime());
+    response_body.is_pdu_created = hakoniwa_asset_is_pdu_created() != 0;
+    response_body.is_simulation_mode = hakoniwa_asset_is_simulation_mode() != 0;
+    response_body.is_pdu_sync_mode = hakoniwa_asset_is_pdu_sync_mode(request.client_name.c_str()) != 0;
   } else {
     response_body.sim_state = -1; // Indicate error
   }
@@ -137,17 +137,17 @@ void SimControlHandler::handle(
     result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_INVALID;
     message = "Invalid SimControl request body.";
   } else {
-    bool ret = false;
+    int ret = -1;
     auto op = static_cast<HakoSimulationControlCommand>(request_body.op);
     switch (op) {
     case HakoSimulationControlCommand::HakoSimControl_Start:
-      ret = hako_simevent_start();
+      ret = hakoniwa_simevent_start();
       break;
     case HakoSimulationControlCommand::HakoSimControl_Stop:
-      ret = hako_simevent_stop();
+      ret = hakoniwa_simevent_stop();
       break;
     case HakoSimulationControlCommand::HakoSimControl_Reset:
-      ret = hako_simevent_reset();
+      ret = hakoniwa_simevent_reset();
       break;
     default:
       std::cerr << "ERROR: Invalid SimControl operation: " << request_body.op
@@ -157,7 +157,7 @@ void SimControlHandler::handle(
       break;
     }
 
-    if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK && !ret) {
+    if ((result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) && (ret != 0)) {
       std::cerr << "ERROR: Failed to execute SimControl operation: "
                 << request_body.op << std::endl;
       result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
@@ -194,10 +194,10 @@ void GetEventHandler::handle(
   }
   
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-    int event_code = hako_asset_get_event(request_body.name.c_str());
+    int event_code = hakoniwa_asset_get_event(request_body.name.c_str());
     if (static_cast<HakoSimulationAssetEvent>(event_code) ==
         HakoSimulationAssetEvent::HakoSimAssetEvent_Error) {
-      std::cerr << "ERROR: hako_asset_get_event() failed for client '"
+      std::cerr << "ERROR: hakoniwa_asset_get_event() failed for client '"
                 << request.client_name << "'." << std::endl;
       result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
     } else {
@@ -234,13 +234,13 @@ void AckEventHandler::handle(
   }
 
   if (result_code == hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK) {
-    bool ret = false;
+    int ret = -1;
     auto event_code =
         static_cast<HakoSimulationAssetEvent>(request_body.event_code);
     switch (event_code) {
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Start:
-      ret = hako_asset_start_feedback(request_body.name.c_str(), true);
-      if (ret) {
+      ret = hakoniwa_asset_start_feedback(request_body.name.c_str(), true);
+      if (ret == 0) {
         /*
         * STARTフィードバックが帰ってきた時点で、クライアント側はPDU転送は完了しているとみなす。
         * PDUの書き込みがそもそもない場合は、ここで完了済みとする。
@@ -255,14 +255,14 @@ void AckEventHandler::handle(
         * 
         * TODO事項： 将来的に上記のPDU書き込み完了待ちを実装する。
         */
-        (void)hako_asset_notify_write_pdu_done(request_body.name.c_str());
+        (void)hakoniwa_asset_notify_write_pdu_done(request_body.name.c_str());
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:
-      ret = hako_asset_stop_feedback(request_body.name.c_str(), true);
+      ret = hakoniwa_asset_stop_feedback(request_body.name.c_str(), true);
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Reset:
-      ret = hako_asset_reset_feedback(request_body.name.c_str(), true);
+      ret = hakoniwa_asset_reset_feedback(request_body.name.c_str(), true);
       break;
     default:
       std::cerr << "ERROR: AckEvent request contains unknown event code: "
@@ -273,7 +273,7 @@ void AckEventHandler::handle(
       break;
     }
 
-    if (!ret) {
+    if (ret != 0) {
         std::cerr << "ERROR: hako_asset_*_feedback failed for event " << request_body.event_code << std::endl;
         result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
     }

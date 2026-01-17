@@ -241,21 +241,8 @@ void AckEventHandler::handle(
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Start:
       ret = hakoniwa_asset_start_feedback(request_body.name.c_str(), true);
       if (ret == 0) {
-        /*
-        * STARTフィードバックが帰ってきた時点で、クライアント側はPDU転送は完了しているとみなす。
-        * PDUの書き込みがそもそもない場合は、ここで完了済みとする。
-        * 
-        * ただし、クライアントの転送から、実際にPDUの書き込みが完了するまでにはタイムラグがあるため、
-        * 将来的には箱庭PDUブリッジ側でのPDU書き込み完了通知を待つように変更する。
-        * 
-        * 箱庭PDUブリッジは、対象のクライアントノードがソースを持つかどうかを知っているため、
-        * もしソースがなければ、即判断できる。
-        * もしソースがある場合は、それらのPDUのファーストライト書き込みが行われたかどうかをチェックする。
-        * これらは、箱庭PDUブリッジが持つべき機能であるため、ここでは実装しない。
-        * 
-        * TODO事項： 将来的に上記のPDU書き込み完了待ちを実装する。
-        */
-        (void)hakoniwa_asset_notify_write_pdu_done(request_body.name.c_str());
+        std::cout << "Asset '" << request_body.name
+                  << "' start acknowledged." << std::endl;
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:

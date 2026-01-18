@@ -109,7 +109,7 @@ void GetSimStateHandler::handle(
     response_body.master_time = static_cast<int64_t>(hakoniwa_asset_get_worldtime());
     response_body.is_pdu_created = hakoniwa_asset_is_pdu_created() != 0;
     response_body.is_simulation_mode = hakoniwa_asset_is_simulation_mode() != 0;
-    response_body.is_pdu_sync_mode = hakoniwa_asset_is_pdu_sync_mode(request.client_name.c_str()) != 0;
+    response_body.is_pdu_sync_mode = hakoniwa_asset_is_pdu_sync_mode(service_context.get_client_node_id().c_str()) != 0;
   } else {
     response_body.sim_state = -1; // Indicate error
   }
@@ -237,19 +237,61 @@ void AckEventHandler::handle(
     int ret = -1;
     auto event_code =
         static_cast<HakoSimulationAssetEvent>(request_body.event_code);
+    auto state = hakoniwa_simevent_get_state();
+    HakoPduErrorType err = HAKO_PDU_ERR_OK;
+    std::cout << "Current simulation state: "
+              << state
+              << std::endl;
     switch (event_code) {
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Start:
+      std::cout << "Acknowledging start event for asset '"
+                << request_body.name << "'." << std::endl;
+
+      if (post_start_cb_) {
+        err = post_start_cb_();
+        if (err != HakoPduErrorType::HAKO_PDU_ERR_OK) {
+          std::cerr << "post_start_all failed with code: " << static_cast<int>(err) << std::endl;
+          result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_ERROR;
+          break;
+        }
+      }
+
+
       ret = hakoniwa_asset_start_feedback(request_body.name.c_str(), true);
       if (ret == 0) {
         std::cout << "Asset '" << request_body.name
                   << "' start acknowledged." << std::endl;
+        //todo timing
+        std::cout << "INFO: Notifying write PDU done for asset: "
+                  << request_body.name << std::endl;
+        hakoniwa_asset_notify_write_pdu_done(request_body.name.c_str());
+      }
+      else {
+        std::cerr << "ERROR: Asset '" << request_body.name
+                  << "' start feedback failed. ret = " << ret << std::endl;
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:
       ret = hakoniwa_asset_stop_feedback(request_body.name.c_str(), true);
+      if (ret == 0) {
+        std::cout << "Asset '" << request_body.name
+                  << "' stop acknowledged." << std::endl;
+      }
+      else {
+        std::cerr << "ERROR: Asset '" << request_body.name
+                  << "' stop feedback failed. ret = " << ret << std::endl;
+      }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Reset:
       ret = hakoniwa_asset_reset_feedback(request_body.name.c_str(), true);
+      if (ret == 0) {
+        std::cout << "Asset '" << request_body.name
+                  << "' reset acknowledged." << std::endl;
+      }
+      else {
+        std::cerr << "ERROR: Asset '" << request_body.name
+                  << "' reset feedback failed. ret = " << ret << std::endl;
+      }
       break;
     default:
       std::cerr << "ERROR: AckEvent request contains unknown event code: "

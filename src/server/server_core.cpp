@@ -133,7 +133,14 @@ bool ServerCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
         handlers_["HakoRemoteApi/GetSimState"] = std::make_unique<GetSimStateHandler>();
         handlers_["HakoRemoteApi/SimControl"] = std::make_unique<SimControlHandler>();
         handlers_["HakoRemoteApi/GetEvent"] = std::make_unique<GetEventHandler>();
-        handlers_["HakoRemoteApi/AckEvent"] = std::make_unique<AckEventHandler>();
+        handlers_["HakoRemoteApi/AckEvent"] = std::make_unique<AckEventHandler>(
+            [this]() -> HakoPduErrorType {
+                if (!endpoint_container_) {
+                    return HAKO_PDU_ERR_INVALID_CONFIG;
+                }
+                return endpoint_container_->post_start_all();
+            }
+        );
 
     } catch (const nlohmann::json::parse_error& e) {
         set_last_error("Failed to parse configuration file: " + std::string(e.what()));

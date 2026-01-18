@@ -88,8 +88,8 @@ void GetSimStateHandler::handle(
     std::shared_ptr<pdu::rpc::RpcServicesServer> service_rpc,
     pdu::rpc::RpcRequest &request) {
   HakoRpcServiceServerTemplateType(GetSimState) service_helper;
-  std::cout << "Handling get_sim_state request from client: "
-            << request.client_name << std::endl;
+  //std::cout << "Handling get_sim_state request from client: "
+  //           << request.client_name << std::endl;
 
   Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
   HakoCpp_GetSimStateRequest request_body;
@@ -178,8 +178,8 @@ void GetEventHandler::handle(
     std::shared_ptr<pdu::rpc::RpcServicesServer> service_rpc,
     pdu::rpc::RpcRequest &request) {
   HakoRpcServiceServerTemplateType(GetEvent) service_helper;
-  std::cout << "Handling get_event request from client: " << request.client_name
-            << std::endl;
+  //std::cout << "Handling get_event request from client: " << request.client_name
+  //          << std::endl;
 
   Hako_int32 result_code = hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_OK;
   HakoCpp_GetEventRequest request_body;

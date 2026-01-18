@@ -163,7 +163,7 @@ bool ClientCore::wait_response_for(const std::string& expected_service, hakoniwa
             return false;
         } else if (event == hakoniwa::pdu::rpc::ClientEventType::RESPONSE_IN) {
             if (service_name_ret == expected_service) {
-                std::cout << "Received response for " << expected_service << " service." << std::endl;
+                //std::cout << "Received response for " << expected_service << " service." << std::endl;
                 break; // Got the response for expected service
                 return true;
             }

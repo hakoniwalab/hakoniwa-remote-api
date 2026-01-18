@@ -23,6 +23,7 @@ public:
     ~ServerCore(); // stop() して join する前提
 
     bool initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container); // if needed in future
+    bool initialize_rpc_services(); // separate init for rpc services
     bool start();  // non-blocking
     bool stop();   // idempotent
 

@@ -139,6 +139,10 @@ bool ServerCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
         set_last_error("Failed to parse configuration file: " + std::string(e.what()));
         return false;
     }
+    return true;
+}
+bool ServerCore::initialize_rpc_services() {
+    std::lock_guard<std::mutex> lock(start_mutex_);
 
     // 2. Initialize RPC Server
     try {

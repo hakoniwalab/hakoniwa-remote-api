@@ -261,10 +261,6 @@ void AckEventHandler::handle(
       if (ret == 0) {
         std::cout << "Asset '" << request_body.name
                   << "' start acknowledged." << std::endl;
-        //todo timing
-        std::cout << "INFO: Notifying write PDU done for asset: "
-                  << request_body.name << std::endl;
-        hakoniwa_asset_notify_write_pdu_done(request_body.name.c_str());
       }
       else {
         std::cerr << "ERROR: Asset '" << request_body.name

@@ -294,19 +294,25 @@ bool ClientCore::get_event(HakoSimulationAssetEvent &event_code) {
 
     request_body.name = node_id_;
     if (!service_helper.call(*rpc_client_, service_name, request_body, 0)) {
+        #ifdef ENABLE_DEBUG_MESSAGES
         std::cerr << "DEBUG: service_helper.call failed in get_event()" << std::endl;
+        #endif
         set_last_error("Failed to call GetEvent service (RPC call failed).");
         return false;
     }
 
     hakoniwa::pdu::rpc::RpcResponse rpc_response;
     if (!wait_response_for(service_name, rpc_response)) {
+        #ifdef ENABLE_DEBUG_MESSAGES
         std::cerr << "DEBUG: wait_response_for failed in get_event()" << std::endl;
+        #endif
         return false; // Error already set in wait_response_for
     }
 
     if (!service_helper.get_response_body(rpc_response, response_body)) {
+        #ifdef ENABLE_DEBUG_MESSAGES
         std::cerr << "DEBUG: get_response_body failed in get_event()" << std::endl;
+        #endif
         set_last_error("Failed to get GetEvent response body.");
         return false;
     }

@@ -72,12 +72,12 @@ class RemoteApiLinter(LinterBase):
             elif role not in {"conductor", "asset"}:
                 self.errors.append(LintError(f"{ctx}.role: invalid value '{role}'"))
 
-            # Check delta_time_usec
-            delta_time = p.get("delta_time_usec")
-            if not self._require_type(delta_time, int, f"{ctx}.delta_time_usec"):
+            # Check poll_sleep_time_usec
+            delta_time = p.get("poll_sleep_time_usec")
+            if not self._require_type(delta_time, int, f"{ctx}.poll_sleep_time_usec"):
                 continue
             if delta_time <= 0:
-                self.errors.append(LintError(f"{ctx}.delta_time_usec: must be > 0"))
+                self.errors.append(LintError(f"{ctx}.poll_sleep_time_usec: must be > 0"))
 
     def _check_servers(self):
         servers = self.data.get("servers")
@@ -104,13 +104,9 @@ class RemoteApiLinter(LinterBase):
         if time_source not in {"real", "virtual", "hakoniwa"}:
             self.errors.append(LintError(f"remote-api.time_source_type: invalid value '{time_source}'"))
 
-        delta_time = self.data.get("delta_time_usec")
-        if self._require_type(delta_time, int, "remote-api.delta_time_usec") and delta_time <= 0:
-            self.errors.append(LintError("remote-api.delta_time_usec: must be > 0"))
-
-        max_delay_time = self.data.get("max_delay_time_usec")
-        if self._require_type(max_delay_time, int, "remote-api.max_delay_time_usec") and max_delay_time <= 0:
-            self.errors.append(LintError("remote-api.max_delay_time_usec: must be > 0"))
+        poll_sleep_time = self.data.get("poll_sleep_time_usec")
+        if self._require_type(poll_sleep_time, int, "remote-api.poll_sleep_time_usec") and poll_sleep_time <= 0:
+            self.errors.append(LintError("remote-api.poll_sleep_time_usec: must be > 0"))
 
     def _get_server_node_ids(self) -> Optional[Set[str]]:
         servers = self.data.get("servers")

@@ -16,6 +16,12 @@ ServerCore::ServerCore(std::string config_path, std::string node_id, bool enable
     // The rest of the initialization happens in start().
 }
 
+void ServerCore::set_conductor_timing(uint64_t delta_time_usec, uint64_t max_delay_time_usec) noexcept
+{
+    conductor_delta_time_usec_ = delta_time_usec;
+    conductor_max_delay_time_usec_ = max_delay_time_usec;
+}
+
 ServerCore::~ServerCore() {
     if (is_running()) {
         stop();
@@ -75,32 +81,31 @@ bool ServerCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
             return false;
         }
     
-        // Check for "delta_time_usec"
-        if (!config_.contains("delta_time_usec") || !config_["delta_time_usec"].is_number_unsigned()) {
-            set_last_error("Config error: 'delta_time_usec' not found or not an unsigned number.");
+        // Check for "poll_sleep_time_usec"
+        if (!config_.contains("poll_sleep_time_usec") || !config_["poll_sleep_time_usec"].is_number_unsigned()) {
+            set_last_error("Config error: 'poll_sleep_time_usec' not found or not an unsigned number.");
             return false;
         }
-        delta_time_usec_ = config_["delta_time_usec"].get<uint64_t>();
-        if (delta_time_usec_ == 0) {
-            set_last_error("Config error: 'delta_time_usec' must be greater than 0.");
-            return false;
-        }
-        if (!config_.contains("max_delay_time_usec") || !config_["max_delay_time_usec"].is_number_unsigned()) {
-            set_last_error("Config error: 'max_delay_time_usec' not found or not an unsigned number.");
-            return false;
-        }
-        uint64_t max_delay_time_usec = config_["max_delay_time_usec"].get<uint64_t>();
-        if (max_delay_time_usec < delta_time_usec_) {
-            set_last_error("Config error: 'max_delay_time_usec' must be greater than or equal to 'delta_time_usec'.");
+        poll_sleep_time_usec_ = config_["poll_sleep_time_usec"].get<uint64_t>();
+        if (poll_sleep_time_usec_ == 0) {
+            set_last_error("Config error: 'poll_sleep_time_usec' must be greater than 0.");
             return false;
         }
         if (enable_conductor_) {
+            if (conductor_delta_time_usec_ == 0 || conductor_max_delay_time_usec_ == 0) {
+                set_last_error("Conductor timing is not configured.");
+                return false;
+            }
+            if (conductor_max_delay_time_usec_ < conductor_delta_time_usec_) {
+                set_last_error("Conductor timing error: max_delay_time_usec must be >= delta_time_usec.");
+                return false;
+            }
             std::cout << "Conductor mode enabled." << std::endl;
             if (hakoniwa_master_init() != 0) {
                 set_last_error("Failed to initialize Hako master.");
                 return false;
             }
-            hakoniwa_master_set_config_simtime(max_delay_time_usec_, delta_time_usec_);
+            hakoniwa_master_set_config_simtime(conductor_max_delay_time_usec_, conductor_delta_time_usec_);
         }
         int ret = hakoniwa_asset_init();
         if (ret != 0) {
@@ -114,7 +119,7 @@ bool ServerCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
             return false;
         }
         std::string time_source_type = config_["time_source_type"];
-        time_source_ = hakoniwa::time_source::create_time_source(time_source_type, delta_time_usec_);
+        time_source_ = hakoniwa::time_source::create_time_source(time_source_type, poll_sleep_time_usec_);
         if (!time_source_) {
             set_last_error("Config error: Invalid 'time_source_type': " + time_source_type);
             return false;
@@ -154,7 +159,8 @@ bool ServerCore::initialize_rpc_services() {
     // 2. Initialize RPC Server
     try {
         // The queue size (1000) is hardcoded for now, as in the test.
-        rpc_server_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesServer>(node_id_, "RpcServerEndpointImpl", rpc_config_path_, 1000);
+        rpc_server_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesServer>(
+            node_id_, "RpcServerEndpointImpl", rpc_config_path_, poll_sleep_time_usec_);
         if (!rpc_server_->initialize_services(endpoint_container_)) {
             set_last_error("Failed to initialize RPC services.");
             rpc_server_.reset();
@@ -230,7 +236,7 @@ void ServerCore::conductor_loop() {
         int simulation_progressed = hakoniwa_master_execute();
         if (simulation_progressed != 0) {
             // If no progress, sleep for delta time
-            std::this_thread::sleep_for(std::chrono::microseconds(delta_time_usec_));
+            std::this_thread::sleep_for(std::chrono::microseconds(conductor_delta_time_usec_));
         }
         else  {
             // Yield to allow other threads to run

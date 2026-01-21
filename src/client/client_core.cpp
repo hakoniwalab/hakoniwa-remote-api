@@ -60,7 +60,7 @@ bool ClientCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
             !item.value().contains("name") ||
             !item.value().contains("nodeId") ||
             !item.value().contains("server_nodeId") ||
-            !item.value().contains("delta_time_usec") ||
+            !item.value().contains("poll_sleep_time_usec") ||
             !item.value()["nodeId"].is_string()) {
           set_last_error("Config error: 'participants' entry malformed.");
           return false;
@@ -68,8 +68,8 @@ bool ClientCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
         if (item.value()["nodeId"] == node_id_) {
             client_name_ = item.value()["name"];
             server_node_id_ = item.value()["server_nodeId"];
-            delta_time_usec_ = item.value()["delta_time_usec"];
-            std::cout << "Client node ID: " << client_name_ << ", Server node ID: " << server_node_id_ << ", Delta time (usec): " << delta_time_usec_ << std::endl;
+            poll_sleep_time_usec_ = item.value()["poll_sleep_time_usec"];
+            std::cout << "Client node ID: " << client_name_ << ", Server node ID: " << server_node_id_ << ", Poll sleep time (usec): " << poll_sleep_time_usec_ << std::endl;
             client_found = true;
             break;
         }
@@ -112,7 +112,7 @@ bool ClientCore::initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> en
   // 2. Initialize RPC Client
   try {
     rpc_client_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesClient>(
-        node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", delta_time_usec_, "real");
+        node_id_, client_name_, rpc_config_path_, "RpcClientEndpointImpl", poll_sleep_time_usec_, "real");
     if (!rpc_client_->initialize_services(endpoint_container_)) {
       set_last_error("Failed to initialize RPC client.");
       rpc_client_.reset();

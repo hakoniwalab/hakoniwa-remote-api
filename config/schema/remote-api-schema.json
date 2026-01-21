@@ -10,8 +10,7 @@
     "rpc_service_config_path",
     "server",
     "time_source_type",
-    "delta_time_usec",
-    "max_delay_time_usec",
+    "poll_sleep_time_usec",
     "participants"
   ],
 
@@ -44,11 +43,7 @@
       "type": "string",
       "enum": ["real", "virtual", "hakoniwa"]
     },
-    "delta_time_usec": {
-      "type": "integer",
-      "minimum": 1
-    },
-    "max_delay_time_usec": {
+    "poll_sleep_time_usec": {
       "type": "integer",
       "minimum": 1
     },
@@ -67,7 +62,7 @@
         "name",
         "nodeId",
         "role",
-        "delta_time_usec"
+        "poll_sleep_time_usec"
       ],
       "properties": {
         "name": {
@@ -82,7 +77,7 @@
           "type": "string",
           "enum": ["conductor", "asset"]
         },
-        "delta_time_usec": {
+        "poll_sleep_time_usec": {
           "type": "integer",
           "minimum": 1
         }

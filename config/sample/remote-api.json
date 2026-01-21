@@ -11,22 +11,21 @@
         }
     ],
     "time_source_type": "real",
-    "delta_time_usec": 1000,
-    "max_delay_time_usec": 20000,
+    "poll_sleep_time_usec": 100000,
     "participants": [
         {
             "name": "client-01",
             "nodeId": "node1",
             "server_nodeId": "node0-1",
             "role": "conductor",
-            "delta_time_usec": 10000
+            "poll_sleep_time_usec": 100000
         },
         {
             "name": "client-02",
             "nodeId": "node2",
             "server_nodeId": "node0-2",
             "role": "conductor",
-            "delta_time_usec": 20000
+            "poll_sleep_time_usec": 100000
         }
     ]
 }

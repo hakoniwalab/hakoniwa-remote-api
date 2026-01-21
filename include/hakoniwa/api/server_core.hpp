@@ -29,6 +29,7 @@ public:
 
     bool is_running() const noexcept { return is_running_.load(); }
     std::string last_error() const noexcept;
+    void set_conductor_timing(uint64_t delta_time_usec, uint64_t max_delay_time_usec) noexcept;
 
 private:
     void serve();
@@ -41,8 +42,9 @@ private:
     std::string node_id_;
     std::string last_error_;
     std::string rpc_config_path_;
-    uint64_t delta_time_usec_{1000};
-    uint64_t max_delay_time_usec_{10000};
+    uint64_t poll_sleep_time_usec_{100000};
+    uint64_t conductor_delta_time_usec_{1000};
+    uint64_t conductor_max_delay_time_usec_{10000};
 
     std::atomic<bool> is_running_{false};
     std::atomic<bool> stop_requested_{false};

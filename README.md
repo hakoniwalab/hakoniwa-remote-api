@@ -3,7 +3,7 @@ Transport-agnostic remote API for operating Hakoniwa worlds, assets, and runtime
 
 ## Architecture
 
-The Remote API exposes a small RPC surface area that clients use to join a Hakoniwa simulation, query state, control the simulation, and acknowledge events. Configuration is provided via `remote-api.json`, which points to the RPC service definition and endpoint details.
+The Remote API exposes a small RPC surface area that clients use to join a Hakoniwa simulation, query state, control the simulation, and acknowledge events. Configuration is provided via `remote-api.json`, which points to the RPC service definition, endpoint details, and poll timing.
 
 ```mermaid
 flowchart LR
@@ -116,7 +116,9 @@ The build generates the `hakoniwa_remote_api` library and sample `server`/`clien
 
 ## Configuration overview
 
-- `config/sample/remote-api.json` defines server nodes, participants, and time settings, and points to `rpc.json`.
+- `config/sample/remote-api.json` defines server nodes, participants, and poll sleep timing, and points to `rpc.json`.
+  - `poll_sleep_time_usec`: server-side poll sleep interval.
+  - `participants[].poll_sleep_time_usec`: client-side poll sleep interval.
 - `config/sample/rpc/rpc.json` defines endpoints and the 5 RPC services.
 - `config/sample/endpoint/*.json` configures transports, caches, and PDU definitions.
 - `config/sample/pdudef/pdudef.json` defines PDU types and sizes.
@@ -125,7 +127,7 @@ The build generates the `hakoniwa_remote_api` library and sample `server`/`clien
 
 - **Transport-agnostic RPC:** The RPC layer is configured via JSON and is not tied to a single transport implementation.
 - **Small, explicit API surface:** The Remote API focuses on 5 core operations that cover join, state query, simulation control, and event handling.
-- **Configuration-driven wiring:** All endpoints, channels, and node IDs are declared in configuration files to avoid hard-coded coupling.
+- **Configuration-driven wiring:** All endpoints, channels, node IDs, and poll timing are declared in configuration files to avoid hard-coded coupling.
 - **Strict validation:** Configuration is validated via schemas and a cross-file linter to catch inconsistencies early.
 
 ## Configuration validation utilities

@@ -76,7 +76,7 @@ private:
     bool wait_response_for(const std::string& expected_service, hakoniwa::pdu::rpc::RpcResponse& out_resp);
     std::string node_id_;
     std::string client_name_;
-    uint64_t delta_time_usec_{1000};
+    uint64_t poll_sleep_time_usec_{100000};
     std::string config_path_;
     std::string server_node_id_;
     std::string rpc_config_path_;

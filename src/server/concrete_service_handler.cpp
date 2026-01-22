@@ -257,7 +257,7 @@ void AckEventHandler::handle(
       }
 
 
-      ret = hakoniwa_asset_start_feedback(request_body.name.c_str(), true);
+      ret = hakoniwa_asset_start_feedback_ok(request_body.name.c_str());
       if (ret == 0) {
         std::cout << "Asset '" << request_body.name
                   << "' start acknowledged." << std::endl;
@@ -268,7 +268,7 @@ void AckEventHandler::handle(
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Stop:
-      ret = hakoniwa_asset_stop_feedback(request_body.name.c_str(), true);
+      ret = hakoniwa_asset_stop_feedback_ok(request_body.name.c_str());
       if (ret == 0) {
         std::cout << "Asset '" << request_body.name
                   << "' stop acknowledged." << std::endl;
@@ -279,7 +279,7 @@ void AckEventHandler::handle(
       }
       break;
     case HakoSimulationAssetEvent::HakoSimAssetEvent_Reset:
-      ret = hakoniwa_asset_reset_feedback(request_body.name.c_str(), true);
+      ret = hakoniwa_asset_reset_feedback_ok(request_body.name.c_str());
       if (ret == 0) {
         std::cout << "Asset '" << request_body.name
                   << "' reset acknowledged." << std::endl;

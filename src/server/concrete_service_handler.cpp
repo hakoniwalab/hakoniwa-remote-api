@@ -247,6 +247,7 @@ void AckEventHandler::handle(
       std::cout << "Acknowledging start event for asset '"
                 << request_body.name << "'." << std::endl;
 
+      hakoniwa_asset_load_pdu_data();//load pdu data..
       if (post_start_cb_) {
         err = post_start_cb_();
         if (err != HakoPduErrorType::HAKO_PDU_ERR_OK) {

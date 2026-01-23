@@ -161,7 +161,7 @@ bool ServerCore::initialize_rpc_services() {
         // The queue size (1000) is hardcoded for now, as in the test.
         rpc_server_ = std::make_shared<hakoniwa::pdu::rpc::RpcServicesServer>(
             node_id_, "RpcServerEndpointImpl", rpc_config_path_, poll_sleep_time_usec_);
-        if (!rpc_server_->initialize_services(endpoint_container_)) {
+        if (!rpc_server_->initialize_services(endpoint_container_, server_context_.get_client_node_id())) {
             set_last_error("Failed to initialize RPC services.");
             rpc_server_.reset();
             return false;
@@ -257,6 +257,14 @@ void ServerCore::serve() {
                 {
                     std::lock_guard<std::mutex> lock(handler_mutex_);
                     if (pending_requests_.count(request.header.service_name) == 0) {
+                        #ifdef ENABLE_DEBUG_MESSAGES
+                        std::cout << "New request received for service: "
+                                  << request.header.service_name << std::endl;
+                        std::cout << "Request ID: " << request.header.request_id
+                                  << ", Client: " << request.header.client_name
+                                  << ", Opcode: " << static_cast<int>(request.header.opcode)
+                                  << std::endl;
+                        #endif
                         pending_requests_[request.header.service_name] = request;
                         inserted = true;
                     } else {
@@ -317,10 +325,18 @@ void ServerCore::handle() {
             const auto& service_name = job.first;
             auto it = handlers_.find(service_name);
             if (it != handlers_.end()) {
+                #ifdef ENABLE_DEBUG_MESSAGES
+                std::cout << "Invoking handler for service: "
+                          << service_name << std::endl;
+                #endif
                 it->second->handle(server_context_, rpc_server_, job.second);
                 {
                     std::lock_guard<std::mutex> lock(handler_mutex_);
                     pending_requests_.erase(service_name);
+                    #ifdef ENABLE_DEBUG_MESSAGES
+                    std::cout << "Service handler completed for service: "
+                              << service_name << std::endl;
+                    #endif
                     if (it->second->is_canceled()) {
                         // Reset cancellation state after handling
                         it->second->reset_canceled();

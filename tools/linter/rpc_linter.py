@@ -43,25 +43,24 @@ class RpcLinter(LinterBase):
 
 
     def _load_endpoints(self) -> List[Dict]:
-        eps = self.data.get("endpoints")
-        if isinstance(eps, str):
-            resolved = self._resolve_path(eps)
+        eps_path = self.data.get("endpoints_config_path")
+        if isinstance(eps_path, str) and eps_path:
+            resolved = self._resolve_path(eps_path)
             if not os.path.exists(resolved):
                 self.errors.append(LintError(
-                    f"rpc.endpoints: not found: '{eps}' (resolved: '{resolved}')"
+                    f"rpc.endpoints_config_path: not found: '{eps_path}' (resolved: '{resolved}')"
                 ))
                 return []
             try:
                 loaded = self._load_json(resolved)
             except (OSError, ValueError) as e:
-                self.errors.append(LintError(f"rpc.endpoints: failed to read {resolved}: {e}"))
+                self.errors.append(LintError(f"rpc.endpoints_config_path: failed to read {resolved}: {e}"))
                 return []
             if not isinstance(loaded, list):
-                self.errors.append(LintError("rpc.endpoints: expected list in endpoints file"))
+                self.errors.append(LintError("rpc.endpoints_config_path: expected list in endpoints file"))
                 return []
             return loaded
-        if self._require_type(eps, list, "rpc.endpoints"):
-            return eps
+        self.errors.append(LintError("rpc.endpoints_config_path: missing or empty string"))
         return []
 
     def _build_endpoint_index(self) -> Dict[str, Set[str]]:

@@ -3,7 +3,7 @@ Transport-agnostic remote API for operating Hakoniwa worlds, assets, and runtime
 
 ## Architecture
 
-The Remote API exposes a small RPC surface area that clients use to join a Hakoniwa simulation, query state, control the simulation, and acknowledge events. Configuration is provided via `remote-api.json`, which points to the RPC service definition, endpoint details, and poll timing.
+The Remote API exposes a small RPC surface area that clients use to join a Hakoniwa simulation, query state, control the simulation, and acknowledge events. Configuration is provided via `remote-api.json`, which points to the RPC service definition, endpoints configuration, and poll timing.
 
 ```mermaid
 flowchart LR
@@ -19,9 +19,10 @@ flowchart LR
   end
 
   subgraph Config Files
-    RA[remote-api.json]
-    RPC[rpc.json]
-    EP[endpoint/*.json]
+  RA[remote-api.json]
+  RPC[rpc.json]
+  EPS[endpoints.json]
+  EP[endpoint/*.json]
     PDU[pdudef.json]
   end
 
@@ -29,7 +30,7 @@ flowchart LR
   CC -->|RPC calls| SC
   SC --> H --> Hako
 
-  RA --> RPC --> EP
+  RA --> RPC --> EPS --> EP
   RPC --> PDU
   CC -.loads.-> RA
   SC -.loads.-> RA
@@ -45,11 +46,11 @@ All RPC services are declared in `config/sample/rpc/rpc.json` and implemented by
 | `HakoRemoteApi/GetSimState` | Retrieve the current simulation state. | `name` (client node ID) | `sim_state`, `master_time`, `is_pdu_created`, `is_simulation_mode`, `is_pdu_sync_mode` |
 | `HakoRemoteApi/SimControl` | Start/stop/reset the simulation. | `name`, `op` (`HakoSimulationControlCommand`) | `status_code`, `message` |
 | `HakoRemoteApi/GetEvent` | Get the next pending event for the client. | `name` | `event_code` |
-| `HakoRemoteApi/AckEvent` | Acknowledge an event after handling. | `name`, `event_code`, `result_code` | `status_code` |
+| `HakoRemoteApi/AckEvent` | Acknowledge an event after handling. | `name`, `event_code`, `result_code` | (no body status; see below) |
 
 ### RPC result codes
 
-Responses use `hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_*` to report success, invalid requests, or internal errors. The server validates the client name before processing requests.
+Responses use `hakoniwa::pdu::rpc::HAKO_SERVICE_RESULT_CODE_*` to report success, invalid requests, or internal errors. `AckEvent` does not set a status in its response body; clients should rely on the RPC header result code. The server validates the client name before processing requests.
 
 ## Server API specification
 
@@ -57,8 +58,10 @@ The server-facing public API is exposed via `hakoniwa::api::ServerCore`.
 
 - `ServerCore(std::string config_path, std::string node_id, bool enable_conductor = false)`
   - Loads configuration from `remote-api.json` and binds to the specified server node ID.
-- `bool initialize()`
-  - Parses configuration, validates server/client pairing, and initializes RPC services.
+- `bool initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container)`
+  - Parses configuration, validates server/client pairing, and registers service handlers.
+- `bool initialize_rpc_services()`
+  - Initializes RPC services after `initialize(...)` has been called.
 - `bool start()`
   - Starts RPC services and spawns worker threads.
 - `bool stop()`
@@ -74,7 +77,7 @@ The client-facing public API is exposed via `hakoniwa::api::ClientCore`.
 
 - `ClientCore(std::string node_id, std::string config_path)`
   - Loads configuration and binds to the specified client node ID.
-- `bool initialize()`
+- `bool initialize(std::shared_ptr<hakoniwa::pdu::EndpointContainer> endpoint_container)`
   - Parses configuration and initializes the RPC client.
 - `bool start()` / `bool stop()`
   - Starts or stops RPC services.
@@ -114,12 +117,37 @@ cmake --build .
 
 The build generates the `hakoniwa_remote_api` library and sample `server`/`client` executables.
 
+## Runtime flow (as implemented)
+
+The sample executables wire up endpoints explicitly and then initialize the core APIs:
+
+### Server flow
+
+1. Create `EndpointContainer` with `<server_nodeId>` and `<endpoints.json>`.
+2. `EndpointContainer::initialize()`
+3. `ServerCore::initialize(endpoint_container)`
+4. `EndpointContainer::start_all()`
+5. `ServerCore::initialize_rpc_services()`
+6. `ServerCore::start()`
+
+### Client flow
+
+1. Create `EndpointContainer` with `<client_nodeId>` and `<endpoints.json>`.
+2. `EndpointContainer::initialize()`
+3. `ClientCore::initialize(endpoint_container)`
+4. `EndpointContainer::start_all()`
+5. `ClientCore::start()`
+
+Note: `ServerCore::start()` requires `initialize_rpc_services()` to have been called. If you are using the sample `src/main/server.cpp` as-is and see "Server is not properly initialized.", add a call to `server.initialize_rpc_services()` before `server.start()`.
+
 ## Configuration overview
 
-- `config/sample/remote-api.json` defines server nodes, participants, and poll sleep timing, and points to `rpc.json`.
+- `config/sample/remote-api.json` defines server nodes, participants, time source, poll sleep timing, and points to `rpc.json` and `endpoints.json`.
   - `poll_sleep_time_usec`: server-side poll sleep interval.
+  - `time_source_type`: time source for server polling (e.g., `real`).
   - `participants[].poll_sleep_time_usec`: client-side poll sleep interval.
-- `config/sample/rpc/rpc.json` defines endpoints and the 5 RPC services.
+- `config/sample/rpc/rpc.json` defines the 5 RPC services and references `endpoints.json` via `endpoints_config_path`. The legacy `endpoints` field is not used.
+- `config/sample/rpc/endpoints.json` maps node IDs to endpoint config files.
 - `config/sample/endpoint/*.json` configures transports, caches, and PDU definitions.
 - `config/sample/pdudef/pdudef.json` defines PDU types and sizes.
 
@@ -127,21 +155,59 @@ The build generates the `hakoniwa_remote_api` library and sample `server`/`clien
 
 - **Transport-agnostic RPC:** The RPC layer is configured via JSON and is not tied to a single transport implementation.
 - **Small, explicit API surface:** The Remote API focuses on 5 core operations that cover join, state query, simulation control, and event handling.
-- **Configuration-driven wiring:** All endpoints, channels, node IDs, and poll timing are declared in configuration files to avoid hard-coded coupling.
+- **Configuration-driven wiring:** Endpoints, channels, node IDs, and poll timing are declared in configuration files; RPC endpoint implementation names are currently fixed in code.
 - **Strict validation:** Configuration is validated via schemas and a cross-file linter to catch inconsistencies early.
 
 ## Configuration validation utilities
 
 ### Validation
 
-To ensure the stability and correctness of the configuration, a two-stage validation process is employed:
+To ensure the stability and correctness of the configuration, use the cross-file consistency linter:
 
-1. **Static Schema Validation:** Each JSON file is first validated against its schema using `ajv`. This catches basic structural and data type errors.
-2. **Cross-File Consistency Linter:** After passing schema validation, the `tools/config_lint.py` script is used to perform a deeper analysis. This linter checks for semantic correctness and ensures consistency between the different configuration files, including:
-   - Validating that all file path references (e.g., to RPC, PDU, or endpoint configurations) point to existing files.
-   - Ensuring that all `nodeId` and `endpointId` references are resolved correctly.
-   - Detecting collisions and ensuring the uniqueness of names and channel IDs.
-   - Verifying logical constraints, such as client counts not exceeding `maxClients`.
+- `tools/config_lint.py` checks for semantic correctness and consistency between configuration files, including:
+  - Validating that all file path references (e.g., to RPC, PDU, or endpoint configurations) point to existing files.
+  - Ensuring that all `nodeId` and `endpointId` references are resolved correctly.
+  - Detecting collisions and ensuring the uniqueness of names and channel IDs.
+  - Verifying logical constraints, such as client counts not exceeding `maxClients`.
+
+## Sample run (from repo root)
+
+These commands use the sample configs shipped in this repository.
+
+### Build
+
+```bash
+git submodule update --init --recursive
+mkdir -p build
+cd build
+cmake ..
+cmake --build .
+```
+
+### Start server
+
+```bash
+./server ../config/sample/remote-api.json node0-1 ../config/sample/rpc/endpoints.json
+```
+
+If the server exits with "Server is not properly initialized.", update `src/main/server.cpp` to call `server.initialize_rpc_services()` before `server.start()`, rebuild, and retry.
+
+### Start client
+
+```bash
+./client ../config/sample/remote-api.json node1 ../config/sample/rpc/endpoints.json
+```
+
+### Client commands
+
+Once the client is running, type one of the following commands and press Enter:
+
+- `join` (register with server)
+- `state` (read simulation state)
+- `g:event` (get next event)
+- `c:start` / `c:stop` / `c:reset` (simulation control)
+- `a:start` / `a:stop` / `a:reset` (ack event)
+- `q` / `quit` / `exit` (quit)
 
 ### `update_pdusize.py`
 

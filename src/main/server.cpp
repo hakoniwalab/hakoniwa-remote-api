@@ -23,6 +23,10 @@ int main(int argc, const char* argv[]) {
         std::cerr << "Server initialization failed: " << server.last_error() << std::endl;
         return 1;
     }
+    if (!server.initialize_rpc_services()) {
+        std::cerr << "Server RPC initialization failed: " << server.last_error() << std::endl;
+        return 1;
+    }
     if (endpoint_container->start_all() != HakoPduErrorType::HAKO_PDU_ERR_OK) {
         std::cerr << "Failed to start all endpoints: " << endpoint_container->last_error() << std::endl;
         return 1;

@@ -104,6 +104,7 @@ The client-facing public API is exposed via `hakoniwa::api::ClientCore`.
 - CMake 3.10+
 - Hakoniwa runtime libraries and headers installed under `/usr/local/hakoniwa`
 - `hakoniwa-pdu-rpc` submodule initialized
+- Installed `hakoniwa-pdu-endpoint` (headers and library)
 
 ### Build
 
@@ -116,6 +117,24 @@ cmake --build .
 ```
 
 The build generates the `hakoniwa_remote_api` library and sample `server`/`client` executables.
+
+### Notes about hakoniwa-pdu-endpoint
+
+`hakoniwa-pdu-endpoint` is no longer a submodule of `hakoniwa-pdu-rpc`. It must be installed separately (default prefix is `/usr/local/hakoniwa`).
+
+If your install prefix is non-standard, pass it to CMake:
+
+```bash
+cmake -S . -B build -DHAKO_PDU_ENDPOINT_PREFIX=/path/to/prefix
+```
+
+Or specify include/library paths directly:
+
+```bash
+cmake -S . -B build \
+  -DHAKO_PDU_ENDPOINT_INCLUDE_DIR=/path/to/include \
+  -DHAKO_PDU_ENDPOINT_LIBRARY=/path/to/lib/libhakoniwa_pdu_endpoint.a
+```
 
 ## Runtime flow (as implemented)
 
@@ -162,13 +181,12 @@ Note: `ServerCore::start()` requires `initialize_rpc_services()` to have been ca
 
 ### Validation
 
-To ensure the stability and correctness of the configuration, use the cross-file consistency linter:
+Use the repo-level linter for `remote-api.json`, and the RPC validator for `rpc.json`:
 
-- `tools/config_lint.py` checks for semantic correctness and consistency between configuration files, including:
-  - Validating that all file path references (e.g., to RPC, PDU, or endpoint configurations) point to existing files.
-  - Ensuring that all `nodeId` and `endpointId` references are resolved correctly.
-  - Detecting collisions and ensuring the uniqueness of names and channel IDs.
-  - Verifying logical constraints, such as client counts not exceeding `maxClients`.
+- `tools/config_lint.py` checks `remote-api.json` structure and referenced `rpc_service_config_path` existence.
+- `tools/config_lint.py` also cross-checks participant `nodeId` entries against the `rpc.json` endpoints list.
+- `hakoniwa-pdu-rpc/tools/validate_configs.py` validates RPC configs, endpoints, and endpoint schemas, and checks RPC semantics
+  (e.g., unique names, channel collisions, maxClients constraints).
 
 ## Sample run (from repo root)
 

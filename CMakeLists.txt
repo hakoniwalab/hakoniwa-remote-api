@@ -37,8 +37,8 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
     include
     /usr/local/hakoniwa/include
+    /usr/local/hakoniwa/include/hakoniwa
     messages/impl/types
-    hakoniwa-pdu-rpc/hakoniwa-pdu-endpoint/include
 )
 
 # Link against the submodule library

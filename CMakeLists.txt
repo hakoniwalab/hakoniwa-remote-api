@@ -20,6 +20,9 @@ foreach(lib_name shakoc hako assets conductor)
   endif()
 endforeach()
 
+ find_package(hakoniwa_pdu_endpoint CONFIG REQUIRED)
+
+
 # Add submodule
 # The second argument specifies the build directory for the submodule, preventing clutter in its source tree
 add_subdirectory(hakoniwa-pdu-rpc build/hakoniwa-pdu-rpc)
@@ -50,9 +53,6 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 
-# Tests
-enable_testing()
-add_subdirectory(test)
 
 
 include(FetchContent)
@@ -78,6 +78,7 @@ target_link_libraries(server
     ${PROJECT_NAME}
     nlohmann_json::nlohmann_json
     hakoniwa_pdu_rpc
+    hakoniwa_pdu_endpoint
 )
 target_link_directories(server
   PRIVATE
@@ -98,6 +99,7 @@ target_link_libraries(client
     ${PROJECT_NAME}
     nlohmann_json::nlohmann_json
     hakoniwa_pdu_rpc
+    hakoniwa_pdu_endpoint
 )
 target_link_directories(client
   PRIVATE

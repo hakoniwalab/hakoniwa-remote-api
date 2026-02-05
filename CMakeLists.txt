@@ -4,6 +4,10 @@ project(hakoniwa_remote_api CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include_directories(
+  /usr/local/hakoniwa/include/hakoniwa/pdu
+)
+
 if(APPLE)
   set(HAKONIWA_LIB_DIRS /usr/local/hakoniwa/lib)
 else()
@@ -20,12 +24,8 @@ foreach(lib_name shakoc hako assets conductor)
   endif()
 endforeach()
 
- find_package(hakoniwa_pdu_endpoint CONFIG REQUIRED)
-
-
-# Add submodule
-# The second argument specifies the build directory for the submodule, preventing clutter in its source tree
-add_subdirectory(hakoniwa-pdu-rpc build/hakoniwa-pdu-rpc)
+find_package(hakoniwa_pdu_endpoint CONFIG REQUIRED)
+find_package(hakoniwa_pdu_rpc CONFIG REQUIRED)
 
 # Add the source files to the library
 
@@ -44,8 +44,6 @@ target_include_directories(${PROJECT_NAME}
     messages/impl/types
 )
 
-# Link against the submodule library
-# This also brings in its public include directories automatically
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     hakoniwa_pdu_rpc

@@ -8,7 +8,7 @@
   "required": [
     "version",
     "rpc_service_config_path",
-    "server",
+    "servers",
     "time_source_type",
     "poll_sleep_time_usec",
     "participants"

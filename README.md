@@ -165,7 +165,7 @@ Note: `ServerCore::start()` requires `initialize_rpc_services()` to have been ca
   - `poll_sleep_time_usec`: server-side poll sleep interval.
   - `time_source_type`: time source for server polling (e.g., `real`).
   - `participants[].poll_sleep_time_usec`: client-side poll sleep interval.
-- `config/sample/rpc/rpc.json` defines the 5 RPC services and references `endpoints.json` via `endpoints_config_path`. The legacy `endpoints` field is not used.
+- `config/sample/rpc/rpc.json` defines the 5 RPC services.
 - `config/sample/rpc/endpoints.json` maps node IDs to endpoint config files.
 - `config/sample/endpoint/*.json` configures transports, caches, and PDU definitions.
 - `config/sample/pdudef/pdudef.json` defines PDU types and sizes.
@@ -183,8 +183,8 @@ Note: `ServerCore::start()` requires `initialize_rpc_services()` to have been ca
 
 Use the repo-level linter for `remote-api.json`, and the RPC validator for `rpc.json`:
 
-- `tools/config_lint.py` checks `remote-api.json` structure and referenced `rpc_service_config_path` existence.
-- `tools/config_lint.py` also cross-checks participant `nodeId` entries against the `rpc.json` endpoints list.
+- `python/hakoniwa_remote_api/validate_configs.py` checks `remote-api.json` structure and referenced `rpc_service_config_path` existence.
+- `python/hakoniwa_remote_api/validate_configs.py` also cross-checks participant `nodeId` entries against the `rpc.json` endpoints list.
 - `hakoniwa-pdu-rpc/tools/validate_configs.py` validates RPC configs, endpoints, and endpoint schemas, and checks RPC semantics
   (e.g., unique names, channel collisions, maxClients constraints).
 
@@ -234,7 +234,7 @@ Once the client is running, type one of the following commands and press Enter:
 **使用方法:**
 
 ```bash
-python3 tools/update_pdusize.py <path_to_rpc_json> <path_to_pdu_size_dir>
+python3 python/hakoniwa_remote_api/update_pdusize.py <path_to_rpc_json> <path_to_pdu_size_dir>
 ```
 
 - `<path_to_rpc_json>`: `rpc.json` ファイルへのパス (例: `config/sample/rpc/rpc.json`)。
@@ -243,5 +243,5 @@ python3 tools/update_pdusize.py <path_to_rpc_json> <path_to_pdu_size_dir>
 **例:**
 
 ```bash
-python3 tools/update_pdusize.py config/sample/rpc/rpc.json messages/impl/pdu_size
+python3 python/hakoniwa_remote_api/update_pdusize.py config/sample/rpc/rpc.json messages/impl/pdu_size
 ```
